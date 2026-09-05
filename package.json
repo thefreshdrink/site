@@ -1,0 +1,10 @@
+{
+  "name": "alisik-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "alisik — portfolio. Dark canvas, quantised collage on wide screens, stacking feed on phones.",
+  "scripts": {
+    "build": "python3 build.py",
+    "serve": "python3 -m http.server 4173"
+  }
+}

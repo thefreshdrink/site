@@ -1,0 +1,7 @@
+# source art — originals stay local, the web-sized copies in assets/img/ are committed
+rt/
+Group 1.png
+*.fig
+
+.DS_Store
+node_modules/
