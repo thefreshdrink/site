@@ -1,8 +1,14 @@
 # alisik — portfolio
 
-Single static page. Dark Miro-style canvas with a dot grid; works shown as a
-quantised collage on wide screens and as a **stacking feed by series** on phones
-(each group slides up and lays over the previous one). Reference: `5heads.ai/feed`.
+Single static page. Dark Miro-style canvas with a dot grid.
+
+- **Wide screens (>760px):** a horizontal **pager** — one group per screen, three
+  offset columns of works, navigated with the `‹ ›` buttons, the mouse wheel, or
+  a sideways swipe. A progress track + the group name sit bottom-left.
+- **Phones (≤760px):** a vertical feed where **every column becomes its own
+  section** — each pins to the top and the next column slides up and lays over it.
+
+Reference: `5heads.ai/feed` + the Claude Design desktop board (`rt/Design - desktop.pdf`).
 
 Live: https://thefreshdrink.github.io/site/
 
@@ -26,11 +32,11 @@ assets/logo.png     white monogram
 2. `npm run build` (needs Python 3 + Pillow: `pip install pillow`).
 3. Commit `assets/img/` and `js/images.js`, push. Pages redeploys on push.
 
-## Groups
+## Groups / columns
 
-Edit `GROUP_LABELS` in `build.py` to rename groups or change how many there are;
-works are split into even chunks in filename order. Two or more groups are needed
-for the phone stacking effect to be visible.
+`build.py` flows works (filename order) into columns of `WORKS_PER_COL`, then
+groups columns into pages of `COLS_PER_PAGE`. Rename pages via `PAGE_LABELS`.
+Defaults: 2 works per column, 3 columns per page → 18 works = 3 pages.
 
 ## Deploy
 

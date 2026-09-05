@@ -14,7 +14,18 @@
 <body>
   <a class="logo" href="#top" aria-label="alisik — наверх"><img src="assets/logo.png" alt="alisik"></a>
 
-  <main id="top" class="feed" aria-label="работы"></main>
+  <main id="top">
+    <div class="pager" id="pager" tabindex="0" aria-label="работы, листается по группам"></div>
+  </main>
+
+  <div class="hud" id="hud" hidden>
+    <span class="hud-label" id="hud-label"></span>
+    <span class="hud-track"><span class="hud-fill" id="hud-fill"></span></span>
+    <div class="hud-nav">
+      <button class="hud-btn" id="page-prev" aria-label="предыдущая группа">‹</button>
+      <button class="hud-btn" id="page-next" aria-label="следующая группа">›</button>
+    </div>
+  </div>
 
   <div class="lb" id="lb" hidden>
     <button class="lb-btn lb-close" aria-label="закрыть">✕</button>

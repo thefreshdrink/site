@@ -1,89 +1,131 @@
 /* alisik — portfolio front-end
-   builds the feed from window.SITE (js/images.js), wires reveal + lightbox.
+   builds pages > columns > tiles from window.SITE, wires the pager HUD,
+   scroll reveal, and the lightbox.
 --------------------------------------------------------------------------- */
 (function () {
   "use strict";
   var SITE = window.SITE;
-  if (!SITE) return;
+  if (!SITE || !SITE.pages) return;
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
-  var feed = document.querySelector(".feed");
+  var pager = document.getElementById("pager");
   var base = SITE.imgBase;
   var widths = SITE.widths;
+  var hi = widths[widths.length - 1];
+  var wide = window.matchMedia("(min-width:761px)");
 
-  // flat list of every work, in document order — the lightbox walks this
-  var flat = [];
+  var flat = [];        // every work, DOM order — the lightbox walks this
+  var colEls = [];      // every .col, DOM order
 
   function srcset(slug) {
-    return widths
-      .map(function (w) { return base + "/" + slug + "-" + w + ".webp " + w + "w"; })
-      .join(", ");
+    return widths.map(function (w) {
+      return base + "/" + slug + "-" + w + ".webp " + w + "w";
+    }).join(", ");
   }
+  function src(slug) { return base + "/" + slug + "-" + hi + ".webp"; }
 
-  // desktop grid span for a work, from its aspect ratio + position rhythm
-  var SQ = ["x3y3", "x4y4", "x4y4", "x3y3", "x5y5", "x4y4", "x3y3", "x4y4"];
-  function sizeClass(ar, i) {
-    if (ar >= 1.6) return "x6y4";
-    if (ar >= 1.25) return "x5y4";
-    if (i % 7 === 4) return "x6y6";     // occasional feature tile
-    return SQ[i % SQ.length];
-  }
+  /* ---- build ------------------------------------------------------------- */
+  var colCounter = 0;
+  SITE.pages.forEach(function (page) {
+    var pageEl = document.createElement("section");
+    pageEl.className = "page";
 
-  var globalIndex = 0;
-  SITE.groups.forEach(function (group, gi) {
-    var section = document.createElement("section");
-    section.className = "grp";
-    section.style.zIndex = String(gi + 1);   // each group stacks over the previous on phones
+    page.cols.forEach(function (col, ci) {
+      var colEl = document.createElement("div");
+      colEl.className = "col";
+      colEl.style.zIndex = String(++colCounter);   // running order → phone stack
 
-    var label = document.createElement("p");
-    label.className = "grp-label";
-    label.textContent = group.label;
-    section.appendChild(label);
+      if (ci === 0) {
+        var lab = document.createElement("p");
+        lab.className = "col-label";
+        lab.textContent = page.label;
+        colEl.appendChild(lab);
+      }
 
-    var collage = document.createElement("div");
-    collage.className = "collage";
+      col.forEach(function (work) {
+        var idx = flat.length;
+        var tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "tile";
+        tile.style.setProperty("--ar", String(work.ar || 1));
+        tile.setAttribute("aria-label", "открыть работу");
 
-    group.works.forEach(function (work, wi) {
-      var idx = globalIndex++;
-      var fig = document.createElement("button");
-      fig.type = "button";
-      fig.className = "tile " + sizeClass(work.ar, wi);
-      fig.style.setProperty("--ar", String(work.ar));
-      fig.setAttribute("aria-label", "открыть работу");
-      fig.dataset.index = String(idx);
+        var img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.src = src(work.slug);
+        img.srcset = srcset(work.slug);
+        img.sizes = "(max-width:760px) 100vw, 30vw";
+        tile.appendChild(img);
 
-      var img = document.createElement("img");
-      img.alt = "";
-      img.loading = "lazy";
-      img.decoding = "async";
-      img.src = base + "/" + work.slug + "-" + widths[widths.length - 1] + ".webp";
-      img.srcset = srcset(work.slug);
-      img.sizes = "(max-width:560px) 100vw, (max-width:900px) 45vw, 30vw";
-      fig.appendChild(img);
+        tile.addEventListener("click", function () { openLightbox(idx); });
+        colEl.appendChild(tile);
+        flat.push({ slug: work.slug });
+      });
 
-      fig.addEventListener("click", function () { openLightbox(idx); });
-      collage.appendChild(fig);
-
-      flat.push({ slug: work.slug });
+      pageEl.appendChild(colEl);
+      colEls.push(colEl);
     });
 
-    section.appendChild(collage);
-    feed.appendChild(section);
+    pager.appendChild(pageEl);
   });
-
-  /* ---- grid unit ---------------------------------------------------------- */
-  function setUnit() {
-    var probe = feed.querySelector(".collage");
-    if (!probe) return;
-    var w = probe.clientWidth;
-    var cols = w < 560 ? 2 : w < 900 ? 8 : 13;
-    var gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap")) || 16;
-    var u = Math.floor((w - gap * (cols - 1)) / cols);
-    if (u > 0) document.documentElement.style.setProperty("--u", u + "px");
+  if (colEls.length) {
+    colEls[0].classList.add("first");
+    colEls[colEls.length - 1].classList.add("last");
   }
-  setUnit();
-  addEventListener("resize", setUnit, { passive: true });
 
-  /* ---- reveal on scroll ------------------------------------------------------ */
+  /* ---- pager HUD (wide screens) --------------------------------------------- */
+  var hud = document.getElementById("hud");
+  var hudLabel = document.getElementById("hud-label");
+  var hudFill = document.getElementById("hud-fill");
+  var prevBtn = document.getElementById("page-prev");
+  var nextBtn = document.getElementById("page-next");
+  var pageCount = SITE.pages.length;
+
+  function currentPage() {
+    return Math.round(pager.scrollLeft / pager.clientWidth);
+  }
+  function goPage(n) {
+    pager.scrollTo({ left: n * pager.clientWidth, behavior: "smooth" });
+  }
+  var ticking = false;
+  function syncHud() {
+    if (!wide.matches) return;
+    var cur = currentPage();
+    hudFill.style.width = (((cur + 1) / pageCount) * 100).toFixed(1) + "%";
+    hudLabel.textContent = (SITE.pages[cur] || SITE.pages[0]).label;
+    prevBtn.disabled = cur <= 0;
+    nextBtn.disabled = cur >= pageCount - 1;
+  }
+  pager.addEventListener("scroll", function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { syncHud(); ticking = false; });
+  }, { passive: true });
+
+  prevBtn.addEventListener("click", function () { goPage(currentPage() - 1); });
+  nextBtn.addEventListener("click", function () { goPage(currentPage() + 1); });
+
+  // vertical wheel pages the pager sideways
+  pager.addEventListener("wheel", function (e) {
+    if (!wide.matches) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      pager.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  function applyMode() {
+    hud.hidden = !wide.matches || pageCount < 1;
+    if (wide.matches) { pager.scrollLeft = pager.scrollLeft; syncHud(); }
+  }
+  (wide.addEventListener ? wide.addEventListener("change", applyMode) : wide.addListener(applyMode));
+  window.addEventListener("resize", function () { requestAnimationFrame(syncHud); }, { passive: true });
+  applyMode();
+  syncHud();
+
+  /* ---- reveal on scroll --------------------------------------------------- */
   var tiles = [].slice.call(document.querySelectorAll(".tile"));
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (entries) {
@@ -93,24 +135,21 @@
     }, { rootMargin: "0px 0px -6% 0px" });
     requestAnimationFrame(function () {
       tiles.forEach(function (t) {
-        if (t.getBoundingClientRect().top > innerHeight * 0.98) {
-          t.classList.add("reveal");
-          io.observe(t);
-        }
+        var r = t.getBoundingClientRect();
+        var out = r.top > innerHeight * 0.98 || r.left > innerWidth * 0.98;
+        if (out) { t.classList.add("reveal"); io.observe(t); }
       });
     });
   }
 
-  /* ---- lightbox ------------------------------------------------------------ */
+  /* ---- lightbox --------------------------------------------------------------- */
   var lb = document.getElementById("lb");
   var lbImg = document.getElementById("lb-img");
   var cur = 0;
 
-  function hi(slug) { return base + "/" + slug + "-" + widths[widths.length - 1] + ".webp"; }
-
   function openLightbox(i) {
     cur = i;
-    lbImg.src = hi(flat[cur].slug);
+    lbImg.src = src(flat[cur].slug);
     lbImg.srcset = srcset(flat[cur].slug);
     lbImg.sizes = "92vw";
     lb.hidden = false;
@@ -122,7 +161,7 @@
   }
   function step(n) {
     cur = (cur + n + flat.length) % flat.length;
-    lbImg.src = hi(flat[cur].slug);
+    lbImg.src = src(flat[cur].slug);
     lbImg.srcset = srcset(flat[cur].slug);
   }
 
@@ -131,14 +170,20 @@
   });
   lb.querySelector(".lb-prev").addEventListener("click", function (e) { e.stopPropagation(); step(-1); });
   lb.querySelector(".lb-next").addEventListener("click", function (e) { e.stopPropagation(); step(1); });
+
   addEventListener("keydown", function (e) {
-    if (lb.hidden) return;
-    if (e.key === "Escape") closeLightbox();
-    else if (e.key === "ArrowLeft") step(-1);
-    else if (e.key === "ArrowRight") step(1);
+    if (!lb.hidden) {
+      if (e.key === "Escape") closeLightbox();
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "ArrowRight") step(1);
+      return;
+    }
+    if (wide.matches) {
+      if (e.key === "ArrowRight") goPage(currentPage() + 1);
+      else if (e.key === "ArrowLeft") goPage(currentPage() - 1);
+    }
   });
 
-  // swipe on touch
   var sx = 0, sy = 0;
   lb.addEventListener("touchstart", function (e) {
     sx = e.changedTouches[0].clientX; sy = e.changedTouches[0].clientY;

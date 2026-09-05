@@ -1,6 +1,7 @@
 /* alisik — portfolio
-   dark Miro-style canvas · quantised collage on wide screens · stacking feed on phones
-   reference: 5heads.ai/feed
+   >760px : horizontal pager — one "group" per screen, 3 offset columns, < > nav
+   <=760px: vertical feed — every column is a section that pins while the next slides over
+   reference: 5heads.ai/feed + the Claude Design desktop board
 ------------------------------------------------------------------------------------ */
 
 :root{
@@ -10,11 +11,9 @@
   --ink-dim:#8b8b91;
   --focus:#b8a7ff;
 
-  --u:88px;                 /* grid unit — set by app.js on resize */
-  --gap:16px;
-  --radius:60px;
-  --shadow:0 18px 44px -14px rgba(0,0,0,.62);
-
+  --gap:22px;
+  --radius:44px;
+  --shadow:0 20px 46px -16px rgba(0,0,0,.6);
   --dot-size:23px;
 
   color-scheme:dark;
@@ -22,56 +21,59 @@
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-html,body{margin:0}
+html,body{margin:0;height:100%}
 body{
   background:var(--canvas);
   background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
   background-size:var(--dot-size) var(--dot-size);
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
-  min-height:100vh;
+  overflow-x:hidden;
 }
 
-/* ---- logo ------------------------------------------------------------------ */
-.logo{
-  position:fixed;top:22px;left:22px;z-index:50;
-  display:block;line-height:0;
-}
+/* ---- logo --------------------------------------------------------------------- */
+.logo{position:fixed;top:22px;left:24px;z-index:60;display:block;line-height:0}
 .logo img{
   width:82px;height:auto;display:block;opacity:.95;
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.55));
 }
 
-/* ---- feed / groups ------------------------------------------------------------ */
-.feed{
-  position:relative;z-index:1;
-  max-width:1240px;margin:0 auto;
-  padding:112px 22px 160px;
+/* ---- pager (wide screens) ---------------------------------------------------- */
+.pager{
+  display:flex;
+  height:100svh;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  outline:none;
 }
-.grp{margin-bottom:70px}
-.grp:last-child{margin-bottom:0}
+.pager::-webkit-scrollbar{display:none}
 
-.grp-label{
-  font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
-  color:var(--ink-dim);
-  margin:0 2px 18px;
-  display:flex;align-items:center;gap:12px;
-}
-.grp-label::after{content:"";flex:1;height:1px;background:var(--dot)}
-
-/* ---- collage (wide screens) ------------------------------------------------- */
-.collage{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, var(--u));
-  grid-auto-rows:var(--u);
-  grid-auto-flow:dense;
-  gap:var(--gap);
+.page{
+  flex:0 0 100%;
+  scroll-snap-align:start;
+  min-height:100svh;
+  display:flex;
   justify-content:center;
+  align-items:flex-start;
+  gap:clamp(20px,4vw,58px);
+  padding:118px clamp(22px,5vw,44px) 96px;
 }
+.col{
+  flex:0 0 clamp(208px,29vw,348px);
+  display:flex;flex-direction:column;
+  gap:var(--gap);
+}
+.col:nth-child(2){margin-top:74px}
+.col:nth-child(3){margin-top:158px}
+
+.col-label{display:none}
 
 .tile{
-  grid-column:span 4;grid-row:span 4;
+  position:relative;
+  width:100%;
+  aspect-ratio:var(--ar, 1);
   border-radius:var(--radius);
   overflow:hidden;
   background:var(--canvas);
@@ -81,84 +83,96 @@ body{
   transition:transform .55s cubic-bezier(.2,.7,.2,1), filter .8s ease, opacity .8s ease;
 }
 .tile > img{width:100%;height:100%;object-fit:cover;display:block}
-.tile.reveal{filter:blur(14px);opacity:.3;transform:translateY(14px) scale(1)}
+.tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
 .tile:hover{transform:translateY(0) scale(1.02)}
 
-/* size classes — colSpan x rowSpan in grid units, assigned per work by aspect */
-.x3y3{grid-column:span 3;grid-row:span 3}
-.x4y4{grid-column:span 4;grid-row:span 4}
-.x5y4{grid-column:span 5;grid-row:span 4}
-.x5y5{grid-column:span 5;grid-row:span 5}
-.x6y4{grid-column:span 6;grid-row:span 4}
-.x6y6{grid-column:span 6;grid-row:span 6}
-
-/* ---- tablet / portrait iPad --------------------------------------------------- */
-@media (max-width:900px){
-  :root{--radius:42px}
-  .feed{padding-top:100px}
-  .x6y6,.x5y5{grid-column:span 5;grid-row:span 5}
-  .x6y4{grid-column:span 6;grid-row:span 4}
+/* ---- HUD: label + progress track + arrows (wide screens) ------------------- */
+.hud{
+  position:fixed;left:0;right:0;bottom:0;z-index:55;
+  display:flex;align-items:center;gap:20px;
+  padding:22px clamp(22px,5vw,40px);
+  pointer-events:none;
 }
+.hud[hidden]{display:none}
+.hud-label{
+  font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
+  color:var(--ink-dim);white-space:nowrap;
+}
+.hud-track{
+  position:relative;flex:1;max-width:190px;height:1px;
+  background:var(--dot);
+}
+.hud-fill{
+  position:absolute;left:0;top:0;height:100%;
+  background:var(--ink);transition:width .35s ease;
+}
+.hud-nav{display:flex;gap:10px;margin-left:auto;pointer-events:auto}
+.hud-btn{
+  width:46px;height:46px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--ink-dim);
+  color:var(--ink);font-size:18px;line-height:1;cursor:pointer;
+  transition:background .16s,border-color .16s,opacity .16s;
+}
+.hud-btn:hover{background:rgba(255,255,255,.08);border-color:var(--ink)}
+.hud-btn:disabled{opacity:.3;cursor:default}
 
-/* ---- phone: stacking feed by series ---------------------------------------- */
-@media (max-width:560px){
+/* ---- phone: vertical stacking feed, one section per column ----------------- */
+@media (max-width:760px){
   :root{--radius:30px}
-  .feed{max-width:none;margin:0;padding:0}
-  .logo{top:16px;left:16px}
-  .logo img{width:68px}
 
-  .grp{
-    /* each group pins to the top, and the next one slides up and lays over it */
-    position:sticky;
-    top:0;
-    margin:0;
+  .pager{display:block;height:auto;overflow:visible;scroll-snap-type:none}
+  .page{display:contents}
+
+  .col{
+    position:sticky;top:0;
     min-height:100svh;
-    padding:44px 14px 44px;
+    margin:0;
+    padding:46px 14px;
+    gap:16px;
     background:var(--canvas);
     background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
     background-size:var(--dot-size) var(--dot-size);
     border-radius:30px 30px 0 0;
     box-shadow:0 -28px 56px -12px rgba(0,0,0,.66);
-    /* z-index set inline by app.js so each group covers the one before it */
+    /* z-index set inline by app.js — every column stacks over the one before */
   }
-  .grp:first-child{border-radius:0;box-shadow:none;padding-top:96px}
-  .grp:last-child{padding-bottom:130px}
+  .col.first{border-radius:0;box-shadow:none;padding-top:72px}
+  .col.last{padding-bottom:130px}
 
-  .grp-label{margin:0 4px 16px}
-
-  .collage{
-    display:flex;flex-direction:column;
-    gap:16px;
+  .col-label{
+    display:flex;align-items:center;gap:12px;
+    margin:0 4px 6px;
+    min-height:44px;                 /* clears the fixed logo */
+    padding-left:74px;               /* text starts to the right of the logo */
+    font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
+    color:var(--ink-dim);
   }
-  .tile{
-    grid-column:auto;grid-row:auto;
-    width:100%;
-    aspect-ratio:var(--ar, 1);
-    box-shadow:0 14px 32px -12px rgba(0,0,0,.55);
-  }
+  .col-label::after{content:"";flex:1;height:1px;background:var(--dot)}
 
-  /* each group rises into place as it enters, then pins and covers the one before */
+  .tile{box-shadow:0 14px 32px -12px rgba(0,0,0,.55)}
+  .tile.reveal{filter:blur(14px);opacity:.3;transform:translateY(14px)}
+
   @supports (animation-timeline:view()){
-    .grp:not(:first-child){
+    .col:not(.first){
       animation:rise linear both;
       animation-timeline:view();
-      animation-range:entry 0% entry 90%;
+      animation-range:entry 0% entry 88%;
     }
     @keyframes rise{
-      from{transform:translateY(40px);border-radius:44px 44px 0 0}
+      from{transform:translateY(42px);border-radius:46px 46px 0 0}
       to{transform:translateY(0);border-radius:30px 30px 0 0}
     }
   }
 }
 
-/* ---- lightbox ------------------------------------------------------------------ */
+/* ---- lightbox -------------------------------------------------------------------- */
 .lb{
   position:fixed;inset:0;z-index:100;
   display:flex;align-items:center;justify-content:center;
   background:rgba(14,14,16,.9);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  cursor:zoom-out;
-  touch-action:pan-y;
+  cursor:zoom-out;touch-action:pan-y;
 }
 .lb[hidden]{display:none}
 .lb-img{
@@ -167,28 +181,22 @@ body{
   cursor:default;user-select:none;
 }
 .lb-btn{
-  position:absolute;
-  display:flex;align-items:center;justify-content:center;
+  position:absolute;display:flex;align-items:center;justify-content:center;
   width:46px;height:46px;border-radius:999px;
   background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);
-  color:var(--ink);font-size:20px;line-height:1;cursor:pointer;
-  transition:background .16s;
+  color:var(--ink);font-size:20px;line-height:1;cursor:pointer;transition:background .16s;
 }
 .lb-btn:hover{background:rgba(255,255,255,.17)}
 .lb-prev{left:16px;top:50%;transform:translateY(-50%)}
 .lb-next{right:16px;top:50%;transform:translateY(-50%)}
 .lb-close{top:16px;right:16px;width:40px;height:40px;font-size:15px}
-@media (max-width:560px){
-  .lb-prev,.lb-next{display:none}
-}
+@media (max-width:760px){.lb-prev,.lb-next{display:none}}
 
-/* ---- a11y / motion ---------------------------------------------------------- */
+/* ---- a11y / motion --------------------------------------------------------- */
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
+  .pager{scroll-behavior:auto}
   .tile{transition:transform .2s}
   .tile.reveal{filter:none;opacity:1;transform:none}
-  @media (max-width:560px){
-    .grp:not(:last-child){animation:none}
-  }
+  @media (max-width:760px){ .col:not(.first){animation:none} }
 }
