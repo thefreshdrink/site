@@ -29,7 +29,6 @@ body{
   background-attachment:fixed;          /* dot field stays put behind everything */
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
 }
 
 /* ---- logo --------------------------------------------------------------------- */
@@ -58,9 +57,11 @@ body{
   display:flex;flex-direction:column;
   gap:var(--gap);
 }
-.col:nth-child(3n+2){margin-top:62px}
-.col:nth-child(3n){margin-top:130px}
-.col:nth-child(4n){margin-top:30px}
+@media (min-width:761px){
+  .col:nth-child(3n+2){margin-top:62px}
+  .col:nth-child(3n){margin-top:130px}
+  .col:nth-child(4n){margin-top:30px}
+}
 
 .col-label{
   display:flex;align-items:center;gap:12px;
@@ -94,46 +95,41 @@ body{
 .tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
 .tile:hover{transform:translateY(0) scale(1.02)}
 
-/* ---- phone — the columns stack, each pinning while the next covers it ------ */
+/* ---- phone — every artwork pins full-bleed, the next scrolls up and covers it,
+   the leaving one dissolves. No panel, no dots on anything that moves. --------- */
 @media (max-width:760px){
-  :root{--radius:26px}
-  .board{display:block;min-height:auto;overflow:visible;padding:0}
+  .board{display:block;padding:0;overflow:visible}
 
   .col{
-    position:sticky;top:0;
-    min-height:100svh;
-    margin:0;
-    padding:46px 14px;
-    gap:16px;
-    /* opaque canvas so the column covers the one before it, but the dot layer is
-       viewport-fixed — the field reads as static while only the art moves */
-    background-color:var(--canvas);
-    background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
-    background-size:var(--dot-size) var(--dot-size);
-    background-attachment:fixed;
-    /* no radius / no shadow — the panel is invisible against the canvas, so only
-       the artworks appear to slide up and stack; z-index set inline by app.js */
+    position:relative;
+    display:block;
+    background:var(--canvas);          /* opaque, no dots — clean dark field */
+    /* z-index set inline by app.js so a later column always covers an earlier one */
   }
-  .col.first{padding-top:72px}
-  .col.last{padding-bottom:130px}
+  .col.last{padding-bottom:96px}
 
   .col-label{
-    min-height:44px;padding-left:74px;   /* clears the fixed logo */
-    margin:0 4px 6px;
+    margin:0;
+    padding:16px 14px 14px 74px;       /* left clears the fixed logo */
+    background:var(--canvas);
   }
+  .col.first .col-label{padding-top:92px}
+  .col-label::after{display:none}
 
-  .tile.reveal{filter:blur(14px);opacity:.3;transform:translateY(14px)}
+  .tile{
+    position:sticky;top:0;
+    display:block;width:100%;
+    margin:0;border-radius:0;box-shadow:none;
+  }
+  .tile.reveal{filter:none;opacity:1;transform:none}   /* the stack is the effect */
 
   @supports (animation-timeline:view()){
-    .col:not(.first){
-      animation:rise linear both;
+    .tile{
+      animation:dissolve linear both;
       animation-timeline:view();
-      animation-range:entry 0% entry 88%;
+      animation-range:exit 4% exit 88%;
     }
-    @keyframes rise{
-      from{transform:translateY(42px)}
-      to{transform:translateY(0)}
-    }
+    @keyframes dissolve{ to{opacity:0;transform:scale(.965)} }
   }
 }
 
