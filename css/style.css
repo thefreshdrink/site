@@ -1,7 +1,7 @@
 /* alisik — portfolio
-   >760px : horizontal pager — one "group" per screen, 3 offset columns, < > nav
-   <=760px: vertical feed — every column is a section that pins while the next slides over
-   reference: 5heads.ai/feed + the Claude Design desktop board
+   >760px : a kanban board — every series is a column, scrolls sideways as one row
+   <=760px: the same columns stacked — each pins while the next slides up over it
+   reference: 5heads.ai/feed + the Claude Design board (rt/Design - desktop.pdf)
 ------------------------------------------------------------------------------------ */
 
 :root{
@@ -12,9 +12,9 @@
   --focus:#b8a7ff;
 
   --gap:22px;
-  --radius:44px;
-  --shadow:0 20px 46px -16px rgba(0,0,0,.6);
   --dot-size:23px;
+  --radius:34px;
+  --shadow:0 20px 42px -14px rgba(0,0,0,.55);
 
   color-scheme:dark;
   font-family:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -23,9 +23,10 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
-  background:var(--canvas);
+  background-color:var(--canvas);
   background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
   background-size:var(--dot-size) var(--dot-size);
+  background-attachment:fixed;          /* dot field stays put behind everything */
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
@@ -38,91 +39,65 @@ body{
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.55));
 }
 
-/* ---- pager (wide screens) ---------------------------------------------------- */
-.pager{
+/* ---- board (wide screens) — horizontal kanban ----------------------------- */
+.board{
   display:flex;
-  height:100svh;
-  overflow-x:auto;overflow-y:hidden;
-  scroll-snap-type:x mandatory;
-  scroll-behavior:smooth;
+  align-items:flex-start;
+  gap:clamp(24px,3.4vw,58px);
+  min-height:100svh;
+  padding:120px clamp(28px,5vw,64px) 90px;
+  overflow-x:auto;
+  overflow-y:hidden;
   scrollbar-width:none;
   outline:none;
 }
-.pager::-webkit-scrollbar{display:none}
+.board::-webkit-scrollbar{display:none}
 
-.page{
-  flex:0 0 100%;
-  scroll-snap-align:start;
-  min-height:100svh;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  gap:clamp(20px,4vw,58px);
-  padding:118px clamp(22px,5vw,44px) 96px;
-}
 .col{
-  flex:0 0 clamp(208px,29vw,348px);
+  flex:0 0 clamp(232px,23vw,338px);
   display:flex;flex-direction:column;
   gap:var(--gap);
 }
-.col:nth-child(2){margin-top:74px}
-.col:nth-child(3){margin-top:158px}
+.col:nth-child(3n+2){margin-top:62px}
+.col:nth-child(3n){margin-top:130px}
+.col:nth-child(4n){margin-top:30px}
 
-.col-label{display:none}
+.col-label{
+  display:flex;align-items:center;gap:12px;
+  margin:0 2px 4px;
+  font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
+  color:var(--ink-dim);white-space:nowrap;
+}
+.col-label::after{content:"";flex:1;height:1px;background:var(--dot)}
 
 .tile{
+  /* it's a <button> — wipe the UA border / grey fill / padding */
+  appearance:none;-webkit-appearance:none;
+  margin:0;padding:0;border:0;font:inherit;color:inherit;
+  background:transparent;
+
   position:relative;
   width:100%;
   aspect-ratio:var(--ar, 1);
   border-radius:var(--radius);
   overflow:hidden;
-  background:var(--canvas);
   box-shadow:var(--shadow);
   cursor:zoom-in;
   transform:translateY(0) scale(1);
   transition:transform .55s cubic-bezier(.2,.7,.2,1), filter .8s ease, opacity .8s ease;
 }
-.tile > img{width:100%;height:100%;object-fit:cover;display:block}
+.tile > img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;
+}
 .tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
 .tile:hover{transform:translateY(0) scale(1.02)}
 
-/* ---- HUD: label + progress track + arrows (wide screens) ------------------- */
-.hud{
-  position:fixed;left:0;right:0;bottom:0;z-index:55;
-  display:flex;align-items:center;gap:20px;
-  padding:22px clamp(22px,5vw,40px);
-  pointer-events:none;
-}
-.hud[hidden]{display:none}
-.hud-label{
-  font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
-  color:var(--ink-dim);white-space:nowrap;
-}
-.hud-track{
-  position:relative;flex:1;max-width:190px;height:1px;
-  background:var(--dot);
-}
-.hud-fill{
-  position:absolute;left:0;top:0;height:100%;
-  background:var(--ink);transition:width .35s ease;
-}
-.hud-nav{display:flex;gap:10px;margin-left:auto;pointer-events:auto}
-.hud-btn{
-  width:46px;height:46px;border-radius:999px;
-  display:flex;align-items:center;justify-content:center;
-  background:transparent;border:1px solid var(--ink-dim);
-  color:var(--ink);font-size:18px;line-height:1;cursor:pointer;
-  transition:background .16s,border-color .16s,opacity .16s;
-}
-.hud-btn:hover{background:rgba(255,255,255,.08);border-color:var(--ink)}
-.hud-btn:disabled{opacity:.3;cursor:default}
-
-/* ---- phone: vertical stacking feed, one section per column ----------------- */
+/* ---- phone — the columns stack, each pinning while the next covers it ------ */
 @media (max-width:760px){
-  :root{--radius:30px}
-
-  .pager{display:block;height:auto;overflow:visible;scroll-snap-type:none}
-  .page{display:contents}
+  :root{--radius:26px}
+  .board{display:block;min-height:auto;overflow:visible;padding:0}
 
   .col{
     position:sticky;top:0;
@@ -130,27 +105,23 @@ body{
     margin:0;
     padding:46px 14px;
     gap:16px;
-    background:var(--canvas);
+    /* opaque canvas so the column covers the one before it, but the dot layer is
+       viewport-fixed — the field reads as static while only the art moves */
+    background-color:var(--canvas);
     background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
     background-size:var(--dot-size) var(--dot-size);
-    border-radius:30px 30px 0 0;
-    box-shadow:0 -28px 56px -12px rgba(0,0,0,.66);
-    /* z-index set inline by app.js — every column stacks over the one before */
+    background-attachment:fixed;
+    /* no radius / no shadow — the panel is invisible against the canvas, so only
+       the artworks appear to slide up and stack; z-index set inline by app.js */
   }
-  .col.first{border-radius:0;box-shadow:none;padding-top:72px}
+  .col.first{padding-top:72px}
   .col.last{padding-bottom:130px}
 
   .col-label{
-    display:flex;align-items:center;gap:12px;
+    min-height:44px;padding-left:74px;   /* clears the fixed logo */
     margin:0 4px 6px;
-    min-height:44px;                 /* clears the fixed logo */
-    padding-left:74px;               /* text starts to the right of the logo */
-    font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
-    color:var(--ink-dim);
   }
-  .col-label::after{content:"";flex:1;height:1px;background:var(--dot)}
 
-  .tile{box-shadow:0 14px 32px -12px rgba(0,0,0,.55)}
   .tile.reveal{filter:blur(14px);opacity:.3;transform:translateY(14px)}
 
   @supports (animation-timeline:view()){
@@ -160,8 +131,8 @@ body{
       animation-range:entry 0% entry 88%;
     }
     @keyframes rise{
-      from{transform:translateY(42px);border-radius:46px 46px 0 0}
-      to{transform:translateY(0);border-radius:30px 30px 0 0}
+      from{transform:translateY(42px)}
+      to{transform:translateY(0)}
     }
   }
 }
@@ -177,7 +148,7 @@ body{
 .lb[hidden]{display:none}
 .lb-img{
   max-width:92vw;max-height:90vh;width:auto;height:auto;
-  border-radius:16px;box-shadow:0 30px 90px rgba(0,0,0,.6);
+  filter:drop-shadow(0 30px 70px rgba(0,0,0,.6));
   cursor:default;user-select:none;
 }
 .lb-btn{
@@ -195,7 +166,6 @@ body{
 /* ---- a11y / motion --------------------------------------------------------- */
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
-  .pager{scroll-behavior:auto}
   .tile{transition:transform .2s}
   .tile.reveal{filter:none;opacity:1;transform:none}
   @media (max-width:760px){ .col:not(.first){animation:none} }

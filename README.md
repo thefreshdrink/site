@@ -2,13 +2,16 @@
 
 Single static page. Dark Miro-style canvas with a dot grid.
 
-- **Wide screens (>760px):** a horizontal **pager** — one group per screen, three
-  offset columns of works, navigated with the `‹ ›` buttons, the mouse wheel, or
-  a sideways swipe. A progress track + the group name sit bottom-left.
-- **Phones (≤760px):** a vertical feed where **every column becomes its own
-  section** — each pins to the top and the next column slides up and lays over it.
+- **Wide screens (>760px):** a **kanban board** — every series is a column, the
+  whole row scrolls sideways (mouse wheel scrolls it horizontally). Columns are
+  staggered vertically for an organic feel.
+- **Phones (≤760px):** the same columns, stacked — each pins to the top and the
+  next column slides up and lays over it.
 
-Reference: `5heads.ai/feed` + the Claude Design desktop board (`rt/Design - desktop.pdf`).
+Art is shown straight from the exports, which already carry their rounded corners
+in the alpha channel — nothing is painted behind them.
+
+Reference: `5heads.ai/feed` + the Claude Design board (`rt/Design - desktop.pdf`).
 
 Live: https://thefreshdrink.github.io/site/
 
@@ -32,11 +35,12 @@ assets/logo.png     white monogram
 2. `npm run build` (needs Python 3 + Pillow: `pip install pillow`).
 3. Commit `assets/img/` and `js/images.js`, push. Pages redeploys on push.
 
-## Groups / columns
+## Columns
 
-`build.py` flows works (filename order) into columns of `WORKS_PER_COL`, then
-groups columns into pages of `COLS_PER_PAGE`. Rename pages via `PAGE_LABELS`.
-Defaults: 2 works per column, 3 columns per page → 18 works = 3 pages.
+The board is defined by `COLUMNS` in `build.py` — an ordered list of
+`(label, [slugs])`. Slugs are `w01..wNN` in `rt/` filename order (run `build.py`
+once to see the mapping printed). Reorder columns, move slugs between them, or
+rename labels freely; any slug you don't list is swept into a trailing column.
 
 ## Deploy
 
