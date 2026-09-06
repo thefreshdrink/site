@@ -21,8 +21,9 @@
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
+html,body{margin:0}
 body{
+  min-height:100vh;
   background-color:var(--canvas);
   background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
   background-size:var(--dot-size) var(--dot-size);
@@ -31,12 +32,24 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ---- logo --------------------------------------------------------------------- */
-.logo{position:fixed;top:22px;left:24px;z-index:60;display:block;line-height:0}
-.logo img{
-  width:82px;height:auto;display:block;opacity:.95;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.55));
+/* ---- bottom bar: "where am I?" left, logo right ---------------------------
+   text + logo blend with what's behind them (mix-blend-mode:difference), so
+   they invert over artworks and stay readable over light or dark — like 5heads */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px clamp(20px,5vw,40px);
+  pointer-events:none;
+  mix-blend-mode:difference;
 }
+.bar > *{pointer-events:auto}
+.bar-where{
+  appearance:none;-webkit-appearance:none;border:0;background:transparent;
+  font:inherit;font-size:13px;letter-spacing:.02em;
+  color:#fff;cursor:pointer;padding:4px 2px;
+}
+.bar-logo{display:block;line-height:0}
+.bar-logo img{width:74px;height:auto;display:block}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -46,7 +59,7 @@ body{
   align-items:stretch;                 /* every column the same height */
   gap:clamp(24px,3.4vw,58px);
   min-height:100svh;
-  padding:120px clamp(28px,5vw,64px) 90px;
+  padding:64px clamp(28px,5vw,64px) 104px;
   overflow-x:auto;
   overflow-y:hidden;
   scrollbar-width:none;
@@ -64,8 +77,10 @@ body{
   margin:0 2px 4px;
   font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
   color:var(--ink-dim);white-space:nowrap;
+  opacity:0;transition:opacity .2s ease;   /* revealed on hover of a work in this column */
 }
 .col-label::after{content:"";flex:1;height:1px;background:var(--dot)}
+.col:has(.tile:hover) .col-label{opacity:1}
 
 .tile{
   /* it's a <button> — wipe the UA border / grey fill / padding */
@@ -91,32 +106,40 @@ body{
 .tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
 .tile:hover{transform:translateY(0) scale(1.02)}
 
-/* ---- phone — every artwork pins full-bleed, the next scrolls up and covers it,
-   the leaving one dissolves. No panel, no dots on anything that moves. --------- */
+/* ---- phone — each artwork pins, the next scrolls up and covers it, the leaving
+   one dissolves. The column is opaque but carries the SAME viewport-fixed dot
+   field as the body, so it is invisible against the background — only the
+   artworks appear to move. --------------------------------------------------- */
 @media (max-width:760px){
+  :root{--radius:24px}
   .board{display:block;padding:0;overflow:visible}
 
   .col{
     position:relative;
     display:block;
-    background:var(--canvas);          /* opaque, no dots — clean dark field */
+    padding:40px 14px;
+    background-color:var(--canvas);
+    background-image:radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px);
+    background-size:var(--dot-size) var(--dot-size);
+    background-attachment:fixed;       /* dots stay put — the panel reads as background */
     /* z-index set inline by app.js so a later column always covers an earlier one */
   }
-  .col.last{padding-bottom:96px}
+  .col.first{padding-top:88px}
+  .col.last{padding-bottom:112px}
 
   .col-label{
-    margin:0;
-    padding:16px 14px 14px 74px;       /* left clears the fixed logo */
-    background:var(--canvas);
+    opacity:1;                          /* always shown on phones (no hover) */
+    margin:0 4px 14px;
   }
-  .col.first .col-label{padding-top:92px}
-  .col-label::after{display:none}
 
   .tile{
     position:sticky;top:0;
     display:block;width:100%;
-    margin:0;border-radius:0;box-shadow:none;
+    margin:0 0 16px;
+    border-radius:var(--radius);
+    box-shadow:0 16px 34px -12px rgba(0,0,0,.5);
   }
+  .tile:last-child{margin-bottom:0}
   .tile.reveal{filter:none;opacity:1;transform:none}   /* the stack is the effect */
 
   @supports (animation-timeline:view()){
