@@ -40,8 +40,10 @@ body{
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
-  display:flex;
-  align-items:flex-start;
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:clamp(232px,23vw,338px);
+  align-items:stretch;                 /* every column the same height */
   gap:clamp(24px,3.4vw,58px);
   min-height:100svh;
   padding:120px clamp(28px,5vw,64px) 90px;
@@ -53,14 +55,8 @@ body{
 .board::-webkit-scrollbar{display:none}
 
 .col{
-  flex:0 0 clamp(232px,23vw,338px);
   display:flex;flex-direction:column;
   gap:var(--gap);
-}
-@media (min-width:761px){
-  .col:nth-child(3n+2){margin-top:62px}
-  .col:nth-child(3n){margin-top:130px}
-  .col:nth-child(4n){margin-top:30px}
 }
 
 .col-label{
