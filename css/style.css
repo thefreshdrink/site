@@ -5,8 +5,8 @@
 ------------------------------------------------------------------------------------ */
 
 :root{
-  --canvas:#232427;
-  --dot:#484951;
+  --canvas:#1c1d20;
+  --dot:#404148;
   --ink:#f2f1ef;
   --ink-dim:#8b8b91;
   --focus:#b8a7ff;
@@ -43,24 +43,24 @@ main{position:relative;z-index:1}
    they invert over artworks and stay readable over light or dark — like 5heads */
 .bar{
   position:fixed;left:0;right:0;bottom:0;z-index:60;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px clamp(20px,5vw,40px);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding:20px clamp(20px,5vw,40px);
   pointer-events:none;
   mix-blend-mode:difference;
 }
 .bar > *{pointer-events:auto}
 .bar-where{
   appearance:none;-webkit-appearance:none;border:0;background:transparent;
-  font:inherit;font-weight:500;font-size:clamp(20px,2.4vw,26px);line-height:1.05;
+  font:inherit;font-weight:500;font-size:clamp(24px,3vw,32px);line-height:1.02;
   letter-spacing:.01em;text-transform:lowercase;
   text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;
-  color:#fff;cursor:pointer;padding:2px;
+  color:#fff;cursor:pointer;padding:0;
   transition:color .16s;
   text-align:left;
 }
 .bar-where:hover{color:#8fb0ff}   /* shifts hue under the difference blend — reads as a link */
 .bar-logo{display:block;line-height:0}
-.bar-logo img{width:76px;height:auto;display:block}
+.bar-logo img{width:82px;height:auto;display:block}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -119,7 +119,7 @@ main{position:relative;z-index:1}
 
 /* ---- phone — the dot field (.bg) is position:fixed and never moves. Columns are
    transparent, so the arts float on that static field; each art pins to the top
-   and the next scrolls up and covers it, the leaving one dissolves. ----------- */
+   and the next scrolls up and covers it. No labels, no fade on the way out. --- */
 @media (max-width:760px){
   :root{--radius:24px}
   .board{display:block;padding:0;overflow:visible}
@@ -127,19 +127,14 @@ main{position:relative;z-index:1}
   .col{
     position:relative;
     display:block;
-    padding:0 14px 22px;
+    padding:0 14px 14px;
     background:transparent;            /* the fixed .bg dots show through, static */
     /* z-index set inline by app.js so a later column always covers an earlier one */
   }
   .col.first{padding-top:64px}
   .col.last{padding-bottom:120px}
 
-  .col-label{
-    opacity:1;                          /* always shown on phones (no hover) */
-    margin:0 2px;
-    padding:20px 0 14px;
-  }
-  .col-label::after{background:var(--dot)}
+  .col-label{display:none}             /* no group names on phones */
 
   .tile{
     position:sticky;top:14px;
@@ -150,15 +145,6 @@ main{position:relative;z-index:1}
   }
   .tile:last-child{margin-bottom:0}
   .tile.reveal{filter:none;opacity:1;transform:none}   /* the stack is the effect */
-
-  @supports (animation-timeline:view()){
-    .tile{
-      animation:dissolve linear both;
-      animation-timeline:view();
-      animation-range:exit 2% exit 82%;
-    }
-    @keyframes dissolve{ to{opacity:0;transform:scale(.955)} }
-  }
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
