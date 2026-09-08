@@ -12,11 +12,11 @@ window.SITE = {
       "label": "petals",
       "works": [
         {
-          "slug": "w06",
+          "slug": "img-2159-1",
           "ar": 1.3333
         },
         {
-          "slug": "w10",
+          "slug": "abstrakt-cover-2-1",
           "ar": 1.3333
         }
       ]
@@ -25,16 +25,16 @@ window.SITE = {
       "label": "club room",
       "works": [
         {
-          "slug": "w01",
+          "slug": "494370bc-1962-46a6-b7f1-067a058d6f9b-1",
           "ar": 1.0
         },
         {
-          "slug": "w02",
-          "ar": 1.3333
+          "slug": "subrosa-4-1",
+          "ar": 1.0
         },
         {
-          "slug": "w17",
-          "ar": 1.0
+          "slug": "a4-28-3-1",
+          "ar": 0.9993
         }
       ]
     },
@@ -42,15 +42,15 @@ window.SITE = {
       "label": "prostor",
       "works": [
         {
-          "slug": "w04",
+          "slug": "frame-1907-1",
           "ar": 1.0
         },
         {
-          "slug": "w18",
+          "slug": "swinwarrior1998-2",
           "ar": 1.0
         },
         {
-          "slug": "w14",
+          "slug": "image-53",
           "ar": 1.0089
         }
       ]
@@ -59,15 +59,15 @@ window.SITE = {
       "label": "posters",
       "works": [
         {
-          "slug": "w03",
+          "slug": "double-poster-mockup-1",
           "ar": 1.7549
         },
         {
-          "slug": "w09",
+          "slug": "mockup-01-1",
           "ar": 1.0
         },
         {
-          "slug": "w16",
+          "slug": "sea-view-rock-1",
           "ar": 1.0
         }
       ]
@@ -76,15 +76,15 @@ window.SITE = {
       "label": "jinx bomb",
       "works": [
         {
-          "slug": "w05",
+          "slug": "frame-21-1",
           "ar": 1.0
         },
         {
-          "slug": "w13",
+          "slug": "image-51",
           "ar": 1.0
         },
         {
-          "slug": "w08",
+          "slug": "img-6242-1",
           "ar": 1.7549
         }
       ]
@@ -93,11 +93,11 @@ window.SITE = {
       "label": "3d",
       "works": [
         {
-          "slug": "w07",
+          "slug": "img-2659-1",
           "ar": 1.0
         },
         {
-          "slug": "w11",
+          "slug": "camphoto-351212254-1",
           "ar": 1.0
         }
       ]
@@ -106,11 +106,24 @@ window.SITE = {
       "label": "type",
       "works": [
         {
-          "slug": "w12",
+          "slug": "image-50",
           "ar": 1.3333
         },
         {
-          "slug": "w15",
+          "slug": "image-60",
+          "ar": 1.0
+        }
+      ]
+    },
+    {
+      "label": "more",
+      "works": [
+        {
+          "slug": "just-a-regular-rock-1",
+          "ar": 1.0
+        },
+        {
+          "slug": "photo-2022-04-30-01-28-01-1",
           "ar": 1.0
         }
       ]

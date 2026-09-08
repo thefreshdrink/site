@@ -7,6 +7,7 @@
   var SITE = window.SITE;
   if (!SITE || !SITE.columns) return;
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  addEventListener("load", function () { window.scrollTo(0, 0); });
 
   var board = document.getElementById("board");
   var base = SITE.imgBase;

@@ -12,6 +12,7 @@ Needs: Pillow  (pip install pillow)
 import glob
 import json
 import os
+import re
 import shutil
 from PIL import Image
 
@@ -22,24 +23,41 @@ WIDTHS = [480, 900, 1500]
 QUALITY = 82
 
 # ----------------------------------------------------------------------------
-# The board is columns, kanban-style. Each column is one series; on phones each
-# column becomes its own stacking section. Slugs are w01..wNN in rt/ filename
-# order (run once to see the mapping printed, then arrange below).
-# Reorder columns, move slugs between them, rename labels — all safe.
-# Any slug not listed is appended to a final "more" column so nothing is lost.
+# The board is columns (kanban on wide screens; a single scroll feed on phones).
+# Each entry below is a column: a label and an ordered list of source files,
+# matched by a case-insensitive substring of the filename. Reorder freely,
+# move a file between columns, rename a label — all safe, nothing is keyed by
+# position any more. Files listed in EXCLUDE are dropped; any file that matches
+# nothing lands in a trailing "more" column so it is never lost silently.
 COLUMNS = [
-    ("petals",    ["w06", "w10"]),
-    ("club room", ["w01", "w02", "w17"]),
-    ("prostor",   ["w04", "w18", "w14"]),
-    ("posters",   ["w03", "w09", "w16"]),
-    ("jinx bomb", ["w05", "w13", "w08"]),
-    ("3d",        ["w07", "w11"]),
-    ("type",      ["w12", "w15"]),
+    ("petals",    ["IMG_2159", "abstrakt_cover (2)"]),
+    ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)"]),
+    ("prostor",   ["Frame 1907", "swinwarrior1998", "image 53"]),
+    ("posters",   ["Double_Poster_Mockup", "MOCKUP-01", "sea view rock"]),
+    ("jinx bomb", ["Frame 21", "image 51", "IMG_6242"]),
+    ("3d",        ["IMG_2659", "camphoto_351212254"]),
+    ("type",      ["image 50", "image 60"]),
 ]
+EXCLUDE = ["9757D019"]
 
 
-def slugify(index):
-    return f"w{index:02d}"
+def slugify(path):
+    stem = os.path.splitext(os.path.basename(path))[0]
+    return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
+
+
+def encode(path):
+    slug = slugify(path)
+    im = Image.open(path).convert("RGBA")
+    ow, oh = im.size
+    for w in WIDTHS:
+        tw = min(w, ow)
+        th = round(tw * oh / ow)
+        resized = im if (tw, th) == (ow, oh) else im.resize((tw, th), Image.LANCZOS)
+        resized.save(os.path.join(OUT_IMG, f"{slug}-{w}.webp"), "WEBP", quality=QUALITY, method=6)
+        if tw == ow:
+            break
+    return {"slug": slug, "ar": round(ow / oh, 4)}
 
 
 def main():
@@ -47,43 +65,36 @@ def main():
     for f in glob.glob(os.path.join(OUT_IMG, "*.webp")):
         os.remove(f)
 
-    files = sorted(glob.glob(os.path.join(SRC, "*.png")))
+    files = [f for f in sorted(glob.glob(os.path.join(SRC, "*.png")))
+             if not any(x.lower() in os.path.basename(f).lower() for x in EXCLUDE)]
     if not files:
         raise SystemExit("no source images in rt/")
 
-    works = {}
-    for i, path in enumerate(files, start=1):
-        slug = slugify(i)
-        im = Image.open(path).convert("RGBA")
-        ow, oh = im.size
-        ar = round(ow / oh, 4)
+    def match(token):
+        hits = [f for f in files if token.lower() in os.path.basename(f).lower()]
+        if len(hits) != 1:
+            raise SystemExit(f"COLUMNS token {token!r} matched {len(hits)} files: {[os.path.basename(h) for h in hits]}")
+        return hits[0]
 
-        for w in WIDTHS:
-            tw = min(w, ow)
-            th = round(tw * oh / ow)
-            resized = im if (tw, th) == (ow, oh) else im.resize((tw, th), Image.LANCZOS)
-            resized.save(os.path.join(OUT_IMG, f"{slug}-{w}.webp"),
-                         "WEBP", quality=QUALITY, method=6)
-            if tw == ow:
-                break
-        works[slug] = {"slug": slug, "ar": ar}
-        print(f"  {slug}  {ow}x{oh}  ar={ar}  <-  {os.path.basename(path)}")
-
-    # logo passes through untouched (small white monogram, transparent)
-    os.makedirs(os.path.join(ROOT, "assets"), exist_ok=True)
-    shutil.copyfile(os.path.join(ROOT, "Vector.png"), os.path.join(ROOT, "assets", "logo.png"))
-
-    # assemble columns from COLUMNS; sweep any unplaced slug into a trailing column
-    used = set()
-    columns = []
-    for label, slugs in COLUMNS:
-        picked = [works[s] for s in slugs if s in works]
-        used.update(s for s in slugs if s in works)
+    used, columns = set(), []
+    for label, tokens in COLUMNS:
+        picked = []
+        for t in tokens:
+            path = match(t)
+            used.add(path)
+            picked.append(encode(path))
+            print(f"  {label:10}  {os.path.basename(path)}")
         if picked:
             columns.append({"label": label, "works": picked})
-    leftover = [works[s] for s in sorted(works) if s not in used]
+
+    leftover = [f for f in files if f not in used]
     if leftover:
-        columns.append({"label": "more", "works": leftover})
+        columns.append({"label": "more", "works": [encode(f) for f in leftover]})
+        for f in leftover:
+            print(f"  {'more':10}  {os.path.basename(f)}")
+
+    os.makedirs(os.path.join(ROOT, "assets"), exist_ok=True)
+    shutil.copyfile(os.path.join(ROOT, "Vector.png"), os.path.join(ROOT, "assets", "logo.png"))
 
     manifest = {
         "logo": "assets/logo.png",
@@ -91,10 +102,9 @@ def main():
         "widths": WIDTHS,
         "columns": columns,
     }
-    js = "/* generated by build.py — do not edit by hand */\n"
-    js += "window.SITE = " + json.dumps(manifest, ensure_ascii=False, indent=2) + ";\n"
     with open(os.path.join(ROOT, "js", "images.js"), "w") as fh:
-        fh.write(js)
+        fh.write("/* generated by build.py — do not edit by hand */\n")
+        fh.write("window.SITE = " + json.dumps(manifest, ensure_ascii=False, indent=2) + ";\n")
     total = sum(len(c["works"]) for c in columns)
     print(f"\nwrote js/images.js — {len(columns)} columns, {total} works")
 

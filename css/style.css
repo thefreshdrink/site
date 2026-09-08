@@ -5,8 +5,8 @@
 ------------------------------------------------------------------------------------ */
 
 :root{
-  --canvas:#1c1d20;
-  --dot:#404148;
+  --canvas:#141519;
+  --dot:#3a3b42;
   --ink:#f2f1ef;
   --ink-dim:#8b8b91;
   --focus:#b8a7ff;
@@ -44,21 +44,21 @@ main{position:relative;z-index:1}
 .bar{
   position:fixed;left:0;right:0;bottom:0;z-index:60;
   display:flex;align-items:flex-end;justify-content:space-between;
-  padding:20px clamp(20px,5vw,40px);
+  padding:26px clamp(30px,6vw,56px);
   pointer-events:none;
-  mix-blend-mode:difference;
 }
-.bar > *{pointer-events:auto}
+.bar-where,.bar-logo{pointer-events:auto;mix-blend-mode:difference}
 .bar-where{
   appearance:none;-webkit-appearance:none;border:0;background:transparent;
-  font:inherit;font-weight:500;font-size:clamp(24px,3vw,32px);line-height:1.02;
-  letter-spacing:.01em;text-transform:lowercase;
-  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;
+  font:inherit;font-weight:600;font-size:clamp(25px,3vw,33px);line-height:1.02;
+  letter-spacing:.005em;text-transform:lowercase;
+  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
   color:#fff;cursor:pointer;padding:0;
   transition:color .16s;
   text-align:left;
 }
 .bar-where:hover{color:#8fb0ff}   /* shifts hue under the difference blend — reads as a link */
+.bar-where span{display:block}    /* two lines */
 .bar-logo{display:block;line-height:0}
 .bar-logo img{width:82px;height:auto;display:block}
 
@@ -122,12 +122,16 @@ main{position:relative;z-index:1}
    and the next scrolls up and covers it. No labels, no fade on the way out. --- */
 @media (max-width:760px){
   :root{--radius:24px}
+
   .board{display:block;padding:0;overflow:visible}
 
   .col{
     position:relative;
     display:block;
-    padding:0 14px 14px;
+    /* generous trailing room: the last art of a column stays pinned — fully
+       covering the one before it — for a good stretch before the column
+       releases and the next series comes up */
+    padding:0 14px 60svh;
     background:transparent;            /* the fixed .bg dots show through, static */
     /* z-index set inline by app.js so a later column always covers an earlier one */
   }
@@ -144,7 +148,9 @@ main{position:relative;z-index:1}
     box-shadow:0 18px 36px -12px rgba(0,0,0,.55);
   }
   .tile:last-child{margin-bottom:0}
-  .tile.reveal{filter:none;opacity:1;transform:none}   /* the stack is the effect */
+
+  /* arts resolve out of a soft blur as they come into view (like the desktop) */
+  .tile.reveal{filter:blur(22px);opacity:.35;transform:translateY(20px) scale(1.015)}
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
