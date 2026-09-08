@@ -11,6 +11,7 @@
   addEventListener("load", function () { toTop(); requestAnimationFrame(toTop); setTimeout(toTop, 120); });
 
   var board = document.getElementById("board");
+  if (window.matchMedia("(max-width:760px)").matches) board.removeAttribute("tabindex");
   var base = SITE.imgBase;
   var widths = SITE.widths;
   var hi = widths[widths.length - 1];

@@ -78,7 +78,7 @@ main{position:relative;z-index:1}
 .mbar .mtxt{
   pointer-events:auto;
   appearance:none;-webkit-appearance:none;border:0;background:transparent;
-  font:inherit;font-weight:600;font-size:clamp(25px,7vw,32px);line-height:1.04;
+  font:inherit;font-weight:500;font-size:clamp(25px,7vw,32px);line-height:1.04;
   letter-spacing:.005em;text-transform:lowercase;
   text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
   color:#fff;cursor:pointer;padding:0;text-align:left;
@@ -165,10 +165,8 @@ main{position:relative;z-index:1}
   .col.first{padding-top:var(--lead, 30svh)}
   .col.last .tile:last-child{margin-bottom:120px}   /* room to scroll clear of the bottom text */
 
-  /* arts stay fully opaque — only ever blurred, never faded.
-     below the focus line: a strong blur; after drifting up past the top: a light one */
-  .tile.reveal{filter:blur(22px);opacity:1;transform:none}
-  .tile.gone{filter:blur(9px);opacity:1;transform:none}
+  /* no blur on phones — arts are just sharp and scroll/stack */
+  .tile.reveal,.tile.gone{filter:none;opacity:1;transform:none}
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
