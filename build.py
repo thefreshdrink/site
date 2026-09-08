@@ -33,12 +33,12 @@ COLUMNS = [
     ("petals",    ["IMG_2159", "abstrakt_cover (2)"]),
     ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)"]),
     ("prostor",   ["Frame 1907", "swinwarrior1998", "image 53"]),
-    ("posters",   ["Double_Poster_Mockup", "MOCKUP-01", "sea view rock"]),
+    ("posters",   ["Double_Poster_Mockup", "sea view rock"]),
     ("jinx bomb", ["Frame 21", "image 51", "IMG_6242"]),
     ("3d",        ["IMG_2659", "camphoto_351212254"]),
-    ("type",      ["image 50", "image 60"]),
+    ("type",      ["image 60"]),
 ]
-EXCLUDE = ["9757D019"]
+EXCLUDE = ["9757D019", "MOCKUP-01", "image 50"]
 
 
 def slugify(path):

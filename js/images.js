@@ -63,10 +63,6 @@ window.SITE = {
           "ar": 1.7549
         },
         {
-          "slug": "mockup-01-1",
-          "ar": 1.0
-        },
-        {
           "slug": "sea-view-rock-1",
           "ar": 1.0
         }
@@ -105,10 +101,6 @@ window.SITE = {
     {
       "label": "type",
       "works": [
-        {
-          "slug": "image-50",
-          "ar": 1.3333
-        },
         {
           "slug": "image-60",
           "ar": 1.0
