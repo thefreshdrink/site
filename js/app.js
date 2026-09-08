@@ -7,7 +7,8 @@
   var SITE = window.SITE;
   if (!SITE || !SITE.columns) return;
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  addEventListener("load", function () { window.scrollTo(0, 0); });
+  function toTop() { window.scrollTo(0, 0); }
+  addEventListener("load", function () { toTop(); requestAnimationFrame(toTop); setTimeout(toTop, 120); });
 
   var board = document.getElementById("board");
   var base = SITE.imgBase;
@@ -67,6 +68,21 @@
     colEls[colEls.length - 1].classList.add("last");
   }
 
+  /* ---- phone: start the very first art centred, above the pin line --------- */
+  var phone = window.matchMedia("(max-width:760px)");
+  function centreFirst() {
+    var root = document.documentElement;
+    if (!phone.matches) { root.style.removeProperty("--lead"); return; }
+    var t = document.querySelector(".col .tile");
+    if (!t) return;
+    var pin = parseFloat(getComputedStyle(root).getPropertyValue("--pin")) || 104;
+    var h = t.getBoundingClientRect().height;
+    root.style.setProperty("--lead", Math.max(pin, Math.round(innerHeight / 2 - h / 2)) + "px");
+  }
+  centreFirst();
+  requestAnimationFrame(centreFirst);
+  addEventListener("resize", centreFirst, { passive: true });
+
   /* ---- vertical wheel scrolls the board sideways (wide screens) ---------- */
   board.addEventListener("wheel", function (e) {
     if (!wide.matches) return;
@@ -89,23 +105,51 @@
     }
   });
 
-  /* ---- reveal on scroll ------------------------------------------------------ */
+  /* ---- reveal on scroll ------------------------------------------------------
+     wide screens: a tile sharpens once it scrolls into view.
+     phone: only the first art starts sharp (it sits centred); every other art
+     stays blurred until it rises near the top, where it settles into focus. */
   var tiles = [].slice.call(document.querySelectorAll(".tile"));
   if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.remove("reveal"); io.unobserve(e.target); }
+    if (phone.matches) {
+      // focus band near the top: a tile sharpens as it rises into it, then gets a
+      // light blur once it has passed above it (its series is leaving)
+      var pio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var t = e.target;
+          if (e.isIntersecting) {
+            t.classList.remove("reveal");
+            t.classList.remove("gone");
+            t._seen = true;
+          } else if (t._seen && e.boundingClientRect.top < 0) {
+            t.classList.add("gone");
+          }
+        });
+      }, { rootMargin: "-30% 0px -55% 0px" });
+      // wait for --lead centring + layout to settle, then seed states from real
+      // positions so nothing un-blurs by accident during first paint
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        tiles.forEach(function (t) {
+          if (t.getBoundingClientRect().top > innerHeight * 0.42) t.classList.add("reveal");
+          pio.observe(t);
+        });
+      }); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.remove("reveal"); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -6% 0px" });
+      requestAnimationFrame(function () {
+        tiles.forEach(function (t) {
+          var r = t.getBoundingClientRect();
+          if (r.top > innerHeight * 0.98 || r.left > innerWidth * 0.98) {
+            t.classList.add("reveal");
+            io.observe(t);
+          }
+        });
       });
-    }, { rootMargin: "0px 0px -6% 0px" });
-    requestAnimationFrame(function () {
-      tiles.forEach(function (t) {
-        var r = t.getBoundingClientRect();
-        if (r.top > innerHeight * 0.98 || r.left > innerWidth * 0.98) {
-          t.classList.add("reveal");
-          io.observe(t);
-        }
-      });
-    });
+    }
   }
 
   /* ---- lightbox --------------------------------------------------------------- */

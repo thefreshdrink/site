@@ -22,6 +22,7 @@
 
 *{box-sizing:border-box}
 html,body{margin:0}
+html{overflow-anchor:none}   /* don't let layout shifts nudge the scroll position */
 body{
   min-height:100vh;
   background:var(--canvas);
@@ -46,8 +47,9 @@ main{position:relative;z-index:1}
   display:flex;align-items:flex-end;justify-content:space-between;
   padding:26px clamp(30px,6vw,56px);
   pointer-events:none;
+  mix-blend-mode:difference;          /* on the container, so it blends with the page behind */
 }
-.bar-where,.bar-logo{pointer-events:auto;mix-blend-mode:difference}
+.bar-where,.bar-logo{pointer-events:auto}
 .bar-where{
   appearance:none;-webkit-appearance:none;border:0;background:transparent;
   font:inherit;font-weight:600;font-size:clamp(25px,3vw,33px);line-height:1.02;
@@ -61,6 +63,28 @@ main{position:relative;z-index:1}
 .bar-where span{display:block}    /* two lines */
 .bar-logo{display:block;line-height:0}
 .bar-logo img{width:82px;height:auto;display:block}
+
+/* phone chrome — text + logo up top, a second line of text at the bottom.
+   Same inverted style. Hidden on wide screens (shown in the phone @media). */
+.mbar-top,.mbar-bot{
+  display:none;
+  position:fixed;left:0;right:0;z-index:60;
+  padding:20px clamp(16px,5vw,28px);
+  pointer-events:none;
+  mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
+}
+.mbar-top{top:0;align-items:flex-start;justify-content:flex-start}
+.mbar-bot{bottom:0;align-items:flex-end;justify-content:flex-end}
+.mbar .mtxt{
+  pointer-events:auto;
+  appearance:none;-webkit-appearance:none;border:0;background:transparent;
+  font:inherit;font-weight:600;font-size:clamp(25px,7vw,32px);line-height:1.04;
+  letter-spacing:.005em;text-transform:lowercase;
+  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
+  color:#fff;cursor:pointer;padding:0;text-align:left;
+}
+.mbar-bot .mtxt{text-align:right}
+.mbar .mtxt span{display:block}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -117,30 +141,34 @@ main{position:relative;z-index:1}
 .tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
 .tile:hover{transform:translateY(0) scale(1.02)}
 
-/* ---- phone — the dot field (.bg) is position:fixed and never moves. Columns are
-   transparent, so the arts float on that static field; each art pins to the top
-   and the next scrolls up and covers it. No labels, no fade on the way out. --- */
+/* ---- phone — one continuous full-bleed stack. First art sits centred; scrolling
+   lifts it until it rests just below the top text + logo; each next art covers
+   the one before it edge-to-edge; when a series ends it drifts up into blur. --- */
 @media (max-width:760px){
-  :root{--radius:24px}
+  :root{--pin:104px}                   /* where a pinned art rests — clear of the header */
+
+  .bar{display:none}
+  .mbar-top,.mbar-bot{display:flex}
 
   .board{display:block;padding:0;overflow:visible}
 
-  /* one continuous stack: no padding, no margin, no gap anywhere between arts or
-     between columns — so each art butts straight against the next and covers it
-     edge-to-edge, never leaving an empty strip */
   .col{position:relative;display:block;margin:0;padding:0;background:transparent}
   .col-label{display:none}
 
   .tile{
-    position:sticky;top:0;
+    position:sticky;top:var(--pin);
     display:block;width:100%;
     margin:0;border-radius:0;box-shadow:none;
     /* z-index set inline by app.js so a later art always covers an earlier one */
   }
-  .col.last .tile:last-child{margin-bottom:120px}   /* clear the bottom bar */
+  /* app.js sets --lead on the first column so art #1 starts centred */
+  .col.first{padding-top:var(--lead, 30svh)}
+  .col.last .tile:last-child{margin-bottom:120px}   /* room to scroll clear of the bottom text */
 
-  /* arts resolve out of a soft blur as they come into view (like the desktop) */
-  .tile.reveal{filter:blur(22px);opacity:.35;transform:scale(1.02)}
+  /* arts stay fully opaque — only ever blurred, never faded.
+     below the focus line: a strong blur; after drifting up past the top: a light one */
+  .tile.reveal{filter:blur(22px);opacity:1;transform:none}
+  .tile.gone{filter:blur(9px);opacity:1;transform:none}
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
