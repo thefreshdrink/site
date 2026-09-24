@@ -171,6 +171,9 @@ main{position:relative;z-index:1}
     margin:0;border-radius:0;box-shadow:none;
     /* z-index set inline by app.js so a later art always covers an earlier one */
   }
+  /* a video reads as its own card even in the full-bleed photo stack —
+     :has() outranks the plain .tile rule above regardless of source order */
+  .tile:has(video){border-radius:var(--radius)}
   /* app.js sets --lead on the first column so art #1 starts centred */
   .col.first{padding-top:var(--lead, 30svh)}
   .col.last .tile:last-child{margin-bottom:120px}   /* room to scroll clear of the bottom text */

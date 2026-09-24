@@ -203,6 +203,20 @@
     }
   }
 
+  /* ---- keep tile videos playing — autoplay is unreliable when a video's tab
+     starts hidden/backgrounded, and it never retries on its own once visible.
+     Nudge .play() whenever a video tile actually enters the viewport. */
+  var videoTiles = [].slice.call(document.querySelectorAll(".tile > video"));
+  if (videoTiles.length && "IntersectionObserver" in window) {
+    var vio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) e.target.play().catch(function () {});
+        else e.target.pause();
+      });
+    }, { threshold: 0.15 });
+    videoTiles.forEach(function (v) { vio.observe(v); });
+  }
+
   /* ---- lightbox --------------------------------------------------------------- */
   var lb = document.getElementById("lb");
   var lbImg = document.getElementById("lb-img");

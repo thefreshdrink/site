@@ -38,14 +38,15 @@ VIDEO_CRF = 28
 # move a file between columns, rename a label — all safe, nothing is keyed by
 # position any more. Files listed in EXCLUDE are dropped; any file that matches
 # nothing lands in a trailing "more" column so it is never lost silently.
+# 5 columns, matching the Figma "Best" frame exactly (both grouping and the
+# top-to-bottom order within each) rather than 7 separate categories — the
+# frame pairs petals with lux_1, and jinx-bomb pieces with the 3d ones.
 COLUMNS = [
-    ("petals",    ["IMG_2159"]),
-    ("club room", ["494370BC", "lux_1", "subrosa (4)", "A4 - 28 (3)"]),
+    ("petals",    ["lux_1", "IMG_2159"]),
+    ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)"]),
     ("prostor",   ["swinwarrior1998", "image 67", "image 53", "image 68"]),
     ("posters",   ["just a regular rock", "Double_Poster_Mockup", "photo_2022-04-30", "sea view rock"]),
-    ("jinx bomb", ["IMG_6242", "Frame 21"]),
-    ("3d",        ["untitled", "camphoto_351212254", "IMG_2659"]),
-    ("type",      []),
+    ("jinx bomb", ["IMG_6242", "Frame 21", "untitled", "camphoto_351212254", "IMG_2659"]),
 ]
 EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", "image 51", "image 60"]
 
@@ -53,16 +54,23 @@ EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", 
 # match as COLUMNS), optionally with a 3rd "start" element to prepend instead
 # of append (matches the piece's position among its column's Figma siblings).
 VIDEOS = [
-    ("type", ["type-w"]),
+    ("posters", ["type-w"], "start"),
     ("petals", ["petals-coral-veo3"], "start"),
 ]
 
 # some generator exports pillarbox/letterbox a vertical render into a 16:9
-# canvas — a hard black bar, not the subject's own negative space (unlike the
-# fuzzy W, which is genuinely padded and stays as-is). token -> (x, y, w, h)
-# crop rect in source pixels, applied before scaling.
+# canvas — a hard black bar, not the subject's own negative space. token ->
+# (x, y, w, h) crop rect in source pixels, applied before scaling. type-w's
+# box is the union of its content across several post-trim frames (the fuzzy
+# growth animation shifts a little — this box never clips it).
 VIDEO_CROP = {
     "petals-coral-veo3": (240, 0, 1439, 1080),
+    "type-w": (400, 0, 1322, 1078),
+}
+
+# label -> seconds to trim off the start (a slow intro before the piece settles)
+VIDEO_TRIM = {
+    "type-w": 3.0,
 }
 
 
@@ -147,8 +155,10 @@ def encode_video(path):
     th = round(tw * h / w / 2) * 2  # even height — required for yuv420p
     vf = (f"crop={crop[2]}:{crop[3]}:{crop[0]}:{crop[1]},scale={tw}:{th}" if crop
           else f"scale={tw}:{th}")
+    trim = VIDEO_TRIM.get(slug)
+    seek = ["-ss", str(trim)] if trim else []
     subprocess.run([
-        "ffmpeg", "-y", "-loglevel", "error", "-i", path,
+        "ffmpeg", "-y", "-loglevel", "error", *seek, "-i", path,
         "-vf", vf,
         "-an", "-c:v", "libx264", "-preset", "slower", "-crf", str(VIDEO_CRF),
         "-pix_fmt", "yuv420p", "-movflags", "+faststart",
@@ -157,7 +167,7 @@ def encode_video(path):
     # a poster frame so the tile has something to show before the video can play
     poster_png = os.path.join(VIDEO_OUT, f"{slug}-poster.png")
     subprocess.run([
-        "ffmpeg", "-y", "-loglevel", "error", "-i", path,
+        "ffmpeg", "-y", "-loglevel", "error", *seek, "-i", path,
         "-vf", vf, "-frames:v", "1", poster_png,
     ], check=True)
     Image.open(poster_png).convert("RGBA").save(

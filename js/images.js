@@ -18,6 +18,10 @@ window.SITE = {
           "video": true
         },
         {
+          "slug": "lux-1-2",
+          "ar": 1.7778
+        },
+        {
           "slug": "img-2159-1",
           "ar": 1.3333
         }
@@ -29,10 +33,6 @@ window.SITE = {
         {
           "slug": "494370bc-1962-46a6-b7f1-067a058d6f9b-1",
           "ar": 1.0
-        },
-        {
-          "slug": "lux-1-2",
-          "ar": 1.7778
         },
         {
           "slug": "subrosa-4-1",
@@ -69,6 +69,11 @@ window.SITE = {
       "label": "posters",
       "works": [
         {
+          "slug": "type-w",
+          "ar": 1.2263,
+          "video": true
+        },
+        {
           "slug": "just-a-regular-rock-1",
           "ar": 1.0
         },
@@ -96,12 +101,7 @@ window.SITE = {
         {
           "slug": "frame-21-1",
           "ar": 1.0
-        }
-      ]
-    },
-    {
-      "label": "3d",
-      "works": [
+        },
         {
           "slug": "untitled-2024-05-13-12-05-40-utc-1",
           "ar": 1.2634
@@ -113,16 +113,6 @@ window.SITE = {
         {
           "slug": "img-2659-1",
           "ar": 1.2816
-        }
-      ]
-    },
-    {
-      "label": "type",
-      "works": [
-        {
-          "slug": "type-w",
-          "ar": 1.7778,
-          "video": true
         }
       ]
     }
