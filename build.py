@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import subprocess
+from collections import deque
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -39,20 +40,21 @@ VIDEO_CRF = 28
 # nothing lands in a trailing "more" column so it is never lost silently.
 COLUMNS = [
     ("petals",    ["IMG_2159"]),
-    ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)", "lux_1"]),
-    ("prostor",   ["image 67", "image 68", "swinwarrior1998", "image 53"]),
-    ("posters",   ["Double_Poster_Mockup", "sea view rock", "just a regular rock", "photo_2022-04-30"]),
-    ("jinx bomb", ["Frame 21", "IMG_6242"]),
-    ("3d",        ["IMG_2659", "camphoto_351212254", "untitled"]),
+    ("club room", ["494370BC", "lux_1", "subrosa (4)", "A4 - 28 (3)"]),
+    ("prostor",   ["swinwarrior1998", "image 67", "image 53", "image 68"]),
+    ("posters",   ["just a regular rock", "Double_Poster_Mockup", "photo_2022-04-30", "sea view rock"]),
+    ("jinx bomb", ["IMG_6242", "Frame 21"]),
+    ("3d",        ["untitled", "camphoto_351212254", "IMG_2659"]),
     ("type",      []),
 ]
 EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", "image 51", "image 60"]
 
 # video works: label -> ordered list of rt_video/*.mp4 tokens (same substring
-# match as COLUMNS). A label here can be new or can add onto a COLUMNS label.
+# match as COLUMNS), optionally with a 3rd "start" element to prepend instead
+# of append (matches the piece's position among its column's Figma siblings).
 VIDEOS = [
     ("type", ["type-w"]),
-    ("petals", ["petals-coral-veo3"]),
+    ("petals", ["petals-coral-veo3"], "start"),
 ]
 
 
@@ -61,9 +63,50 @@ def slugify(path):
     return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
 
 
+def restore_corner_alpha(im, tolerance=6, scan=300):
+    """Figma's node export bakes the page background into a frame's rounded
+    corners instead of leaving them transparent (only affects assets pulled
+    via the Figma MCP — the original hand-exported PNGs already have real
+    alpha there). Flood-fill each corner from the page-background colour back
+    to alpha 0, so a rounded frame reads as rounded again instead of showing
+    a square matte. A no-op on images that already have real transparency."""
+    w, h = im.size
+    px = im.load()
+    if px[0, 0][3] != 255:
+        return im  # real transparency already — nothing baked in to fix
+    bg = px[0, 0][:3]
+
+    def close(c):
+        return all(abs(c[i] - bg[i]) <= tolerance for i in range(3))
+
+    for cx, cy, dx, dy in ((0, 0, 1, 1), (w - 1, 0, -1, 1), (0, h - 1, 1, -1), (w - 1, h - 1, -1, -1)):
+        if not close(px[cx, cy][:3]):
+            continue
+        sw, sh = min(scan, w), min(scan, h)
+        x0 = 0 if dx == 1 else w - sw
+        y0 = 0 if dy == 1 else h - sh
+        start = (cx - x0, cy - y0)
+        seen = [[False] * sw for _ in range(sh)]
+        seen[start[1]][start[0]] = True
+        q = deque([start])
+        while q:
+            lx, ly = q.popleft()
+            gx, gy = lx + x0, ly + y0
+            r, g, b, _ = px[gx, gy]
+            px[gx, gy] = (r, g, b, 0)
+            for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = lx + ddx, ly + ddy
+                if 0 <= nx < sw and 0 <= ny < sh and not seen[ny][nx]:
+                    ngx, ngy = nx + x0, ny + y0
+                    if close(px[ngx, ngy][:3]):
+                        seen[ny][nx] = True
+                        q.append((nx, ny))
+    return im
+
+
 def encode(path):
     slug = slugify(path)
-    im = Image.open(path).convert("RGBA")
+    im = restore_corner_alpha(Image.open(path).convert("RGBA"))
     ow, oh = im.size
     for w in WIDTHS:
         tw = min(w, ow)
@@ -147,13 +190,17 @@ def main():
             print(f"  {label:10}  {os.path.basename(path)}")
         works_by_label[label] = picked
 
-    for label, tokens in VIDEOS:
-        picked = works_by_label.setdefault(label, [])
+    for entry in VIDEOS:
+        label, tokens = entry[0], entry[1]
+        position = entry[2] if len(entry) > 2 else "end"
+        existing = works_by_label.setdefault(label, [])
+        new_works = []
         for t in tokens:
             path = match_video(t)
             used_video.add(path)
-            picked.append(encode_video(path))
+            new_works.append(encode_video(path))
             print(f"  {label:10}  {os.path.basename(path)} (video)")
+        works_by_label[label] = new_works + existing if position == "start" else existing + new_works
 
     columns = [{"label": label, "works": works_by_label[label]}
                for label, _ in COLUMNS if works_by_label.get(label)]

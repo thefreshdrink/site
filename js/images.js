@@ -13,13 +13,13 @@ window.SITE = {
       "label": "petals",
       "works": [
         {
-          "slug": "img-2159-1",
-          "ar": 1.3333
-        },
-        {
           "slug": "petals-coral-veo3",
           "ar": 1.7778,
           "video": true
+        },
+        {
+          "slug": "img-2159-1",
+          "ar": 1.3333
         }
       ]
     },
@@ -31,16 +31,16 @@ window.SITE = {
           "ar": 1.0
         },
         {
+          "slug": "lux-1-2",
+          "ar": 1.7778
+        },
+        {
           "slug": "subrosa-4-1",
           "ar": 1.0
         },
         {
           "slug": "a4-28-3-1",
           "ar": 0.9993
-        },
-        {
-          "slug": "lux-1-2",
-          "ar": 1.7778
         }
       ]
     },
@@ -48,20 +48,20 @@ window.SITE = {
       "label": "prostor",
       "works": [
         {
-          "slug": "image-67",
-          "ar": 1.3333
-        },
-        {
-          "slug": "image-68",
-          "ar": 1.3333
-        },
-        {
           "slug": "swinwarrior1998-2",
           "ar": 1.0
         },
         {
+          "slug": "image-67",
+          "ar": 1.3333
+        },
+        {
           "slug": "image-53",
           "ar": 1.0089
+        },
+        {
+          "slug": "image-68",
+          "ar": 1.3333
         }
       ]
     },
@@ -69,19 +69,19 @@ window.SITE = {
       "label": "posters",
       "works": [
         {
-          "slug": "double-poster-mockup-1",
-          "ar": 1.7549
-        },
-        {
-          "slug": "sea-view-rock-1",
-          "ar": 1.0
-        },
-        {
           "slug": "just-a-regular-rock-1",
           "ar": 1.0
         },
         {
+          "slug": "double-poster-mockup-1",
+          "ar": 1.7549
+        },
+        {
           "slug": "photo-2022-04-30-01-28-01-1",
+          "ar": 1.0
+        },
+        {
+          "slug": "sea-view-rock-1",
           "ar": 1.0
         }
       ]
@@ -90,12 +90,12 @@ window.SITE = {
       "label": "jinx bomb",
       "works": [
         {
-          "slug": "frame-21-1",
-          "ar": 1.0
-        },
-        {
           "slug": "img-6242-1",
           "ar": 1.7549
+        },
+        {
+          "slug": "frame-21-1",
+          "ar": 1.0
         }
       ]
     },
@@ -103,16 +103,16 @@ window.SITE = {
       "label": "3d",
       "works": [
         {
-          "slug": "img-2659-1",
-          "ar": 1.2816
+          "slug": "untitled-2024-05-13-12-05-40-utc-1",
+          "ar": 1.2634
         },
         {
           "slug": "camphoto-351212254-1",
           "ar": 1.0
         },
         {
-          "slug": "untitled-2024-05-13-12-05-40-utc-1",
-          "ar": 1.2634
+          "slug": "img-2659-1",
+          "ar": 1.2816
         }
       ]
     },
