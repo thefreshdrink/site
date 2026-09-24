@@ -10,12 +10,16 @@
   function toTop() { window.scrollTo(0, 0); }
   addEventListener("load", function () { toTop(); requestAnimationFrame(toTop); setTimeout(toTop, 120); });
 
+  // a narrow viewport, or any touch device gone short (a phone rotated to
+  // landscape) — keep in sync with the mobile @media queries in style.css
+  var BREAKPOINT = "(max-width:760px), (pointer:coarse) and (max-height:760px)";
+  var phone = window.matchMedia(BREAKPOINT);
+
   var board = document.getElementById("board");
-  if (window.matchMedia("(max-width:760px)").matches) board.removeAttribute("tabindex");
+  if (phone.matches) board.removeAttribute("tabindex");
   var base = SITE.imgBase;
   var widths = SITE.widths;
   var hi = widths[widths.length - 1];
-  var wide = window.matchMedia("(min-width:761px)");
 
   var flat = [];        // every work, DOM order — the lightbox walks this
   var colEls = [];
@@ -70,7 +74,6 @@
   }
 
   /* ---- phone: start the very first art centred, above the pin line --------- */
-  var phone = window.matchMedia("(max-width:760px)");
   function centreFirst() {
     var root = document.documentElement;
     if (!phone.matches) { root.style.removeProperty("--lead"); return; }
@@ -84,9 +87,41 @@
   requestAnimationFrame(centreFirst);
   addEventListener("resize", centreFirst, { passive: true });
 
+  /* ---- phone: top-right label names whichever series is scrolling past ----- */
+  var catEl = document.getElementById("mbar-cat");
+  if (catEl && colEls.length) {
+    var catSpan = catEl.querySelector("span");
+    var lastCat = null;
+    var activeColumnLabel = function () {
+      var y = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--pin")) || 104;
+      for (var i = 0; i < colEls.length; i++) {
+        var r = colEls[i].getBoundingClientRect();
+        if (r.top <= y && r.bottom > y) return SITE.columns[i].label;
+      }
+      return colEls[0].getBoundingClientRect().top > y
+        ? SITE.columns[0].label
+        : SITE.columns[SITE.columns.length - 1].label;
+    };
+    var catTicking = false;
+    var updateCat = function () {
+      catTicking = false;
+      if (!phone.matches) return;
+      var label = activeColumnLabel();
+      if (label !== lastCat) { lastCat = label; catSpan.textContent = label; }
+    };
+    var requestCatUpdate = function () {
+      if (catTicking) return;
+      catTicking = true;
+      requestAnimationFrame(updateCat);
+    };
+    addEventListener("scroll", requestCatUpdate, { passive: true });
+    addEventListener("resize", requestCatUpdate, { passive: true });
+    requestAnimationFrame(updateCat);
+  }
+
   /* ---- vertical wheel scrolls the board sideways (wide screens) ---------- */
   board.addEventListener("wheel", function (e) {
-    if (!wide.matches) return;
+    if (phone.matches) return;
     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       board.scrollLeft += e.deltaY;
       e.preventDefault();
@@ -100,7 +135,7 @@
       else if (e.key === "ArrowRight") step(1);
       return;
     }
-    if (wide.matches && document.activeElement === board) {
+    if (!phone.matches && document.activeElement === board) {
       if (e.key === "ArrowRight") board.scrollBy({ left: 340, behavior: "smooth" });
       else if (e.key === "ArrowLeft") board.scrollBy({ left: -340, behavior: "smooth" });
     }

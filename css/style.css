@@ -73,7 +73,7 @@ main{position:relative;z-index:1}
   pointer-events:none;
   mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
 }
-.mbar-top{top:0;align-items:flex-start;justify-content:flex-start}
+.mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px}
 .mbar-bot{bottom:0;align-items:flex-end;justify-content:flex-end}
 .mbar .mtxt{
   pointer-events:auto;
@@ -81,10 +81,12 @@ main{position:relative;z-index:1}
   font:inherit;font-weight:500;font-size:clamp(25px,7vw,32px);line-height:1.04;
   letter-spacing:.005em;text-transform:lowercase;
   text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
-  color:#fff;cursor:pointer;padding:0;text-align:left;
+  color:#fff;cursor:pointer;padding:0;text-align:left;margin:0;
 }
 .mbar-bot .mtxt{text-align:right}
 .mbar .mtxt span{display:block}
+/* right-corner label — not a button, just reflects the series scrolling past */
+.mtxt-cat{text-align:right;cursor:default;transition:opacity .2s ease}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -139,12 +141,19 @@ main{position:relative;z-index:1}
   display:block;
 }
 .tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
-.tile:hover{transform:translateY(0) scale(1.02)}
+/* scale-on-hover is a mouse affordance only — a touch tap can "stick" :hover on
+   phones, and scaling a full-bleed sticky tile (without moving its layout box)
+   opened a pixel-line seam at the edge of the tile stacked behind it */
+@media (hover:hover) and (pointer:fine){
+  .tile:hover{transform:translateY(0) scale(1.02)}
+}
 
 /* ---- phone — one continuous full-bleed stack. First art sits centred; scrolling
    lifts it until it rests just below the top text + logo; each next art covers
-   the one before it edge-to-edge; when a series ends it drifts up into blur. --- */
-@media (max-width:760px){
+   the one before it edge-to-edge; when a series ends it drifts up into blur.
+   Triggers on narrow viewports AND on any touch device that's gone short (a
+   phone rotated to landscape) — keep in sync with BREAKPOINT in app.js. ------- */
+@media (max-width:760px), (pointer:coarse) and (max-height:760px){
   :root{--pin:104px}                   /* where a pinned art rests — clear of the header */
 
   .bar{display:none}
@@ -194,12 +203,12 @@ main{position:relative;z-index:1}
 .lb-prev{left:16px;top:50%;transform:translateY(-50%)}
 .lb-next{right:16px;top:50%;transform:translateY(-50%)}
 .lb-close{top:16px;right:16px;width:40px;height:40px;font-size:15px}
-@media (max-width:760px){.lb-prev,.lb-next{display:none}}
+@media (max-width:760px), (pointer:coarse) and (max-height:760px){.lb-prev,.lb-next{display:none}}
 
 /* ---- a11y / motion --------------------------------------------------------- */
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
   .tile{transition:transform .2s}
   .tile.reveal{filter:none;opacity:1;transform:none}
-  @media (max-width:760px){ .col:not(.first){animation:none} }
+  @media (max-width:760px), (pointer:coarse) and (max-height:760px){ .col:not(.first){animation:none} }
 }
