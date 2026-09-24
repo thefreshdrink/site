@@ -1,5 +1,6 @@
 # source art — originals stay local, the web-sized copies in assets/img/ are committed
 rt/
+rt_video/
 Group 1.png
 *.fig
 

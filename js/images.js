@@ -2,6 +2,7 @@
 window.SITE = {
   "logo": "assets/logo.png",
   "imgBase": "assets/img",
+  "videoBase": "assets/video",
   "widths": [
     480,
     900,
@@ -16,8 +17,9 @@ window.SITE = {
           "ar": 1.3333
         },
         {
-          "slug": "abstrakt-cover-2-1",
-          "ar": 1.3333
+          "slug": "petals-coral-veo3",
+          "ar": 1.7778,
+          "video": true
         }
       ]
     },
@@ -35,6 +37,10 @@ window.SITE = {
         {
           "slug": "a4-28-3-1",
           "ar": 0.9993
+        },
+        {
+          "slug": "lux-1-2",
+          "ar": 1.7778
         }
       ]
     },
@@ -42,8 +48,12 @@ window.SITE = {
       "label": "prostor",
       "works": [
         {
-          "slug": "frame-1907-1",
-          "ar": 1.0
+          "slug": "image-67",
+          "ar": 1.3333
+        },
+        {
+          "slug": "image-68",
+          "ar": 1.3333
         },
         {
           "slug": "swinwarrior1998-2",
@@ -84,10 +94,6 @@ window.SITE = {
           "ar": 1.0
         },
         {
-          "slug": "image-51",
-          "ar": 1.0
-        },
-        {
           "slug": "img-6242-1",
           "ar": 1.7549
         }
@@ -98,11 +104,15 @@ window.SITE = {
       "works": [
         {
           "slug": "img-2659-1",
-          "ar": 1.0
+          "ar": 1.2816
         },
         {
           "slug": "camphoto-351212254-1",
           "ar": 1.0
+        },
+        {
+          "slug": "untitled-2024-05-13-12-05-40-utc-1",
+          "ar": 1.2634
         }
       ]
     },
@@ -110,8 +120,9 @@ window.SITE = {
       "label": "type",
       "works": [
         {
-          "slug": "image-60",
-          "ar": 1.0
+          "slug": "type-w",
+          "ar": 1.7778,
+          "video": true
         }
       ]
     }
