@@ -151,6 +151,7 @@ main{position:relative;z-index:1}
   .mbar-top,.mbar-bot{display:flex}
 
   .board{display:block;padding:0;overflow:visible}
+  .bg{background:#000}
 
   .col{position:relative;display:block;margin:0;padding:0;background:transparent}
   .col-label{display:none}

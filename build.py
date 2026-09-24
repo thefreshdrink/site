@@ -33,7 +33,7 @@ COLUMNS = [
     ("petals",    ["IMG_2159", "abstrakt_cover (2)"]),
     ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)"]),
     ("prostor",   ["Frame 1907", "swinwarrior1998", "image 53"]),
-    ("posters",   ["Double_Poster_Mockup", "sea view rock"]),
+    ("posters",   ["Double_Poster_Mockup", "sea view rock", "just a regular rock", "photo_2022-04-30"]),
     ("jinx bomb", ["Frame 21", "image 51", "IMG_6242"]),
     ("3d",        ["IMG_2659", "camphoto_351212254"]),
     ("type",      ["image 60"]),

@@ -65,6 +65,14 @@ window.SITE = {
         {
           "slug": "sea-view-rock-1",
           "ar": 1.0
+        },
+        {
+          "slug": "just-a-regular-rock-1",
+          "ar": 1.0
+        },
+        {
+          "slug": "photo-2022-04-30-01-28-01-1",
+          "ar": 1.0
         }
       ]
     },
@@ -103,19 +111,6 @@ window.SITE = {
       "works": [
         {
           "slug": "image-60",
-          "ar": 1.0
-        }
-      ]
-    },
-    {
-      "label": "more",
-      "works": [
-        {
-          "slug": "just-a-regular-rock-1",
-          "ar": 1.0
-        },
-        {
-          "slug": "photo-2022-04-30-01-28-01-1",
           "ar": 1.0
         }
       ]
