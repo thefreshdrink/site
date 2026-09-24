@@ -73,7 +73,7 @@ main{position:relative;z-index:1}
   pointer-events:none;
   mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
 }
-.mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px}
+.mbar-top{top:0;align-items:flex-start;justify-content:flex-start}
 .mbar-bot{bottom:0;align-items:flex-end;justify-content:flex-end}
 .mbar .mtxt{
   pointer-events:auto;
@@ -85,8 +85,6 @@ main{position:relative;z-index:1}
 }
 .mbar-bot .mtxt{text-align:right}
 .mbar .mtxt span{display:block}
-/* right-corner label — not a button, just reflects the series scrolling past */
-.mtxt-cat{text-align:right;cursor:default;transition:opacity .2s ease}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -148,38 +146,28 @@ main{position:relative;z-index:1}
   .tile:hover{transform:translateY(0) scale(1.02)}
 }
 
-/* ---- phone — one continuous full-bleed stack. First art sits centred; scrolling
-   lifts it until it rests just below the top text + logo; each next art covers
-   the one before it edge-to-edge; when a series ends it drifts up into blur.
-   Triggers on narrow viewports AND on any touch device that's gone short (a
-   phone rotated to landscape) — keep in sync with BREAKPOINT in app.js. ------- */
+/* ---- phone — a scattered collage feed (5heads.ai/feed): uneven rows of 1-2
+   columns, a column stacking up to 2 works, corner radius alternating 0/60 —
+   see the ROW_TEMPLATES/RADII comment in app.js for the actual mix. Triggers
+   on narrow viewports AND on any touch device that's gone short (a phone
+   rotated to landscape) — keep in sync with BREAKPOINT in app.js. ------- */
 @media (max-width:760px), (pointer:coarse) and (max-height:760px){
-  :root{--pin:104px}                   /* where a pinned art rests — clear of the header */
-
   .bar{display:none}
   .mbar-top,.mbar-bot{display:flex}
 
-  .board{display:block;padding:0;overflow:visible}
+  .board{
+    display:flex;flex-direction:column;
+    gap:10px;
+    padding:118px 10px 140px;
+    overflow:visible;
+  }
   .bg{background:#000}
 
-  .col{position:relative;display:block;margin:0;padding:0;background:transparent}
-  .col-label{display:none}
+  .mrow{display:flex;align-items:flex-start;gap:10px}
+  .mcol{display:flex;flex-direction:column;gap:10px;min-width:0}
 
-  .tile{
-    position:sticky;top:var(--pin);
-    display:block;width:100%;
-    margin:0;border-radius:0;box-shadow:none;
-    /* z-index set inline by app.js so a later art always covers an earlier one */
-  }
-  /* a video reads as its own card even in the full-bleed photo stack —
-     :has() outranks the plain .tile rule above regardless of source order */
-  .tile:has(video){border-radius:var(--radius)}
-  /* app.js sets --lead on the first column so art #1 starts centred */
-  .col.first{padding-top:var(--lead, 30svh)}
-  .col.last .tile:last-child{margin-bottom:120px}   /* room to scroll clear of the bottom text */
-
-  /* no blur on phones — arts are just sharp and scroll/stack */
-  .tile.reveal,.tile.gone{filter:none;opacity:1;transform:none}
+  .tile{width:100%;box-shadow:none}
+  /* radius is set inline per-tile by app.js (0 or 60) — no CSS override needed */
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
@@ -213,5 +201,4 @@ main{position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){
   .tile{transition:transform .2s}
   .tile.reveal{filter:none;opacity:1;transform:none}
-  @media (max-width:760px), (pointer:coarse) and (max-height:760px){ .col:not(.first){animation:none} }
 }

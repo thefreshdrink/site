@@ -34,104 +34,100 @@
   function poster(slug) { return base + "/" + slug + "-poster.webp"; }
   function videoSrc(slug) { return videoBase + "/" + slug + ".mp4"; }
 
-  /* ---- build ------------------------------------------------------------- */
-  var z = 0;
-  SITE.columns.forEach(function (column) {
-    var colEl = document.createElement("section");
-    colEl.className = "col";
-    colEl.style.zIndex = String(++z);
+  /* ---- build --------------------------------------------------------------
+     a tile is shared by both layouts; only its container differs. */
+  function buildTile(work, radius) {
+    var idx = flat.length;
+    var tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "tile";
+    tile.style.setProperty("--ar", String(work.ar || 1));
+    if (radius != null) tile.style.borderRadius = radius + "px";
+    tile.setAttribute("aria-label", "открыть работу");
 
-    var label = document.createElement("p");
-    label.className = "col-label";
-    label.textContent = column.label;
-    colEl.appendChild(label);
+    if (work.video) {
+      var vid = document.createElement("video");
+      vid.muted = true;
+      vid.loop = true;
+      vid.autoplay = true;
+      vid.playsInline = true;
+      vid.preload = "auto";
+      vid.poster = poster(work.slug);
+      vid.src = videoSrc(work.slug);
+      tile.appendChild(vid);
+    } else {
+      var img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.src = src(work.slug);
+      img.srcset = srcset(work.slug);
+      img.sizes = "(max-width:760px) 100vw, 32vw";
+      tile.appendChild(img);
+    }
 
-    column.works.forEach(function (work) {
-      var idx = flat.length;
-      var tile = document.createElement("button");
-      tile.type = "button";
-      tile.className = "tile";
-      tile.style.setProperty("--ar", String(work.ar || 1));
-      tile.setAttribute("aria-label", "открыть работу");
+    tile.addEventListener("click", function () { openLightbox(idx); });
+    flat.push({ slug: work.slug, video: !!work.video });
+    return tile;
+  }
 
-      if (work.video) {
-        var vid = document.createElement("video");
-        vid.muted = true;
-        vid.loop = true;
-        vid.autoplay = true;
-        vid.playsInline = true;
-        vid.preload = "auto";
-        vid.poster = poster(work.slug);
-        vid.src = videoSrc(work.slug);
-        tile.appendChild(vid);
-      } else {
-        var img = document.createElement("img");
-        img.alt = "";
-        img.loading = "lazy";
-        img.decoding = "async";
-        img.src = src(work.slug);
-        img.srcset = srcset(work.slug);
-        img.sizes = "(max-width:760px) 100vw, 32vw";
-        tile.appendChild(img);
+  if (phone.matches) {
+    // 5heads-style scattered feed: one flat sequence (series order kept, the
+    // grouping just isn't shown visually), packed into rows of 1-2 columns.
+    // A column can stack 2 items — since .mrow uses align-items:flex-start,
+    // a column that finishes first just leaves black behind it instead of
+    // stretching, which is exactly where the reference's black voids come
+    // from. Corner radius alternates 0/60, the reference's own two-value mix.
+    var ROW_TEMPLATES = [
+      [{ w: 100, n: 1 }],
+      [{ w: 45, n: 1 }, { w: 55, n: 1 }],
+      [{ w: 38, n: 2 }, { w: 62, n: 1 }],
+      [{ w: 62, n: 1 }, { w: 38, n: 1 }],
+      [{ w: 100, n: 1 }],
+      [{ w: 55, n: 1 }, { w: 45, n: 2 }],
+      [{ w: 30, n: 1 }, { w: 70, n: 1 }],
+      [{ w: 70, n: 1 }, { w: 30, n: 2 }],
+    ];
+    var RADII = [0, 60, 0, 0, 60, 0];
+    var works = [];
+    SITE.columns.forEach(function (c) { c.works.forEach(function (w) { works.push(w); }); });
+    var ti = 0, wi = 0;
+    while (wi < works.length) {
+      var tmpl = ROW_TEMPLATES[ti++ % ROW_TEMPLATES.length];
+      var row = document.createElement("div");
+      row.className = "mrow";
+      for (var c = 0; c < tmpl.length && wi < works.length; c++) {
+        var col = document.createElement("div");
+        col.className = "mcol";
+        col.style.flex = tmpl[c].w + " 1 0%";
+        for (var n = 0; n < tmpl[c].n && wi < works.length; n++, wi++) {
+          col.appendChild(buildTile(works[wi], RADII[flat.length % RADII.length]));
+        }
+        row.appendChild(col);
       }
+      board.appendChild(row);
+    }
+  } else {
+    var z = 0;
+    SITE.columns.forEach(function (column) {
+      var colEl = document.createElement("section");
+      colEl.className = "col";
+      colEl.style.zIndex = String(++z);
 
-      tile.addEventListener("click", function () { openLightbox(idx); });
-      colEl.appendChild(tile);
-      flat.push({ slug: work.slug, video: !!work.video });
+      var label = document.createElement("p");
+      label.className = "col-label";
+      label.textContent = column.label;
+      colEl.appendChild(label);
+
+      column.works.forEach(function (work) { colEl.appendChild(buildTile(work)); });
+
+      board.appendChild(colEl);
+      colEls.push(colEl);
     });
-
-    board.appendChild(colEl);
-    colEls.push(colEl);
-  });
-  if (colEls.length) {
-    colEls[0].classList.add("first");
-    colEls[colEls.length - 1].classList.add("last");
-  }
-
-  /* ---- phone: start the very first art centred, above the pin line --------- */
-  function centreFirst() {
-    var root = document.documentElement;
-    if (!phone.matches) { root.style.removeProperty("--lead"); return; }
-    var t = document.querySelector(".col .tile");
-    if (!t) return;
-    var pin = parseFloat(getComputedStyle(root).getPropertyValue("--pin")) || 104;
-    var h = t.getBoundingClientRect().height;
-    root.style.setProperty("--lead", Math.max(pin, Math.round(innerHeight / 2 - h / 2)) + "px");
-  }
-  centreFirst();
-  requestAnimationFrame(centreFirst);
-  addEventListener("resize", centreFirst, { passive: true });
-
-  /* ---- phone: top-right label names whichever series is scrolling past ----- */
-  var catEl = document.getElementById("mbar-cat");
-  if (catEl && colEls.length) {
-    var catSpan = catEl.querySelector("span");
-    var lastCat = null;
-    var activeColumnLabel = function () {
-      var y = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--pin")) || 104;
-      for (var i = 0; i < colEls.length; i++) {
-        var r = colEls[i].getBoundingClientRect();
-        if (r.top <= y && r.bottom > y) return SITE.columns[i].label;
-      }
-      return colEls[0].getBoundingClientRect().top > y
-        ? SITE.columns[0].label
-        : SITE.columns[SITE.columns.length - 1].label;
-    };
-    var catTicking = false;
-    var updateCat = function () {
-      catTicking = false;
-      if (!phone.matches) return;
-      var label = activeColumnLabel();
-      if (label !== lastCat) { lastCat = label; catSpan.textContent = label; }
-    };
-    var requestCatUpdate = function () {
-      if (catTicking) return;
-      catTicking = true;
-      requestAnimationFrame(updateCat);
-    };
-    addEventListener("scroll", requestCatUpdate, { passive: true });
-    addEventListener("resize", requestCatUpdate, { passive: true });
-    requestAnimationFrame(updateCat);
+    if (colEls.length) {
+      colEls[0].classList.add("first");
+      colEls[colEls.length - 1].classList.add("last");
+    }
   }
 
   /* ---- vertical wheel scrolls the board sideways (wide screens) ---------- */
@@ -156,51 +152,24 @@
     }
   });
 
-  /* ---- reveal on scroll ------------------------------------------------------
-     wide screens: a tile sharpens once it scrolls into view.
-     phone: only the first art starts sharp (it sits centred); every other art
-     stays blurred until it rises near the top, where it settles into focus. */
+  /* ---- reveal on scroll — a tile sharpens (blur -> fade) once it scrolls
+     into view, same on phone and wide screens. */
   var tiles = [].slice.call(document.querySelectorAll(".tile"));
   if ("IntersectionObserver" in window) {
-    if (phone.matches) {
-      // focus band near the top: a tile sharpens as it rises into it, then gets a
-      // light blur once it has passed above it (its series is leaving)
-      var pio = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          var t = e.target;
-          if (e.isIntersecting) {
-            t.classList.remove("reveal");
-            t.classList.remove("gone");
-            t._seen = true;
-          } else if (t._seen && e.boundingClientRect.top < 0) {
-            t.classList.add("gone");
-          }
-        });
-      }, { rootMargin: "-30% 0px -55% 0px" });
-      // wait for --lead centring + layout to settle, then seed states from real
-      // positions so nothing un-blurs by accident during first paint
-      requestAnimationFrame(function () { requestAnimationFrame(function () {
-        tiles.forEach(function (t) {
-          if (t.getBoundingClientRect().top > innerHeight * 0.42) t.classList.add("reveal");
-          pio.observe(t);
-        });
-      }); });
-    } else {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.remove("reveal"); io.unobserve(e.target); }
-        });
-      }, { rootMargin: "0px 0px -6% 0px" });
-      requestAnimationFrame(function () {
-        tiles.forEach(function (t) {
-          var r = t.getBoundingClientRect();
-          if (r.top > innerHeight * 0.98 || r.left > innerWidth * 0.98) {
-            t.classList.add("reveal");
-            io.observe(t);
-          }
-        });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.remove("reveal"); io.unobserve(e.target); }
       });
-    }
+    }, { rootMargin: "0px 0px -6% 0px" });
+    requestAnimationFrame(function () {
+      tiles.forEach(function (t) {
+        var r = t.getBoundingClientRect();
+        if (r.top > innerHeight * 0.98 || r.left > innerWidth * 0.98) {
+          t.classList.add("reveal");
+          io.observe(t);
+        }
+      });
+    });
   }
 
   /* ---- keep tile videos playing — autoplay is unreliable when a video's tab
