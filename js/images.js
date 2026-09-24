@@ -14,7 +14,7 @@ window.SITE = {
       "works": [
         {
           "slug": "petals-coral-veo3",
-          "ar": 1.7778,
+          "ar": 1.3324,
           "video": true
         },
         {

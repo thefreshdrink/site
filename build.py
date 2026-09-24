@@ -57,6 +57,14 @@ VIDEOS = [
     ("petals", ["petals-coral-veo3"], "start"),
 ]
 
+# some generator exports pillarbox/letterbox a vertical render into a 16:9
+# canvas — a hard black bar, not the subject's own negative space (unlike the
+# fuzzy W, which is genuinely padded and stays as-is). token -> (x, y, w, h)
+# crop rect in source pixels, applied before scaling.
+VIDEO_CROP = {
+    "petals-coral-veo3": (240, 0, 1439, 1080),
+}
+
 
 def slugify(path):
     stem = os.path.splitext(os.path.basename(path))[0]
@@ -131,11 +139,17 @@ def probe_video_size(path):
 def encode_video(path):
     slug = slugify(path)
     w, h = probe_video_size(path)
+    crop = VIDEO_CROP.get(slug)
+    if crop:
+        cx, cy, cw, ch = crop
+        w, h = cw, ch
     tw = min(VIDEO_MAX_WIDTH, w)
     th = round(tw * h / w / 2) * 2  # even height — required for yuv420p
+    vf = (f"crop={crop[2]}:{crop[3]}:{crop[0]}:{crop[1]},scale={tw}:{th}" if crop
+          else f"scale={tw}:{th}")
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error", "-i", path,
-        "-vf", f"scale={tw}:{th}",
+        "-vf", vf,
         "-an", "-c:v", "libx264", "-preset", "slower", "-crf", str(VIDEO_CRF),
         "-pix_fmt", "yuv420p", "-movflags", "+faststart",
         os.path.join(VIDEO_OUT, f"{slug}.mp4"),
@@ -144,7 +158,7 @@ def encode_video(path):
     poster_png = os.path.join(VIDEO_OUT, f"{slug}-poster.png")
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error", "-i", path,
-        "-vf", f"scale={tw}:{th}", "-frames:v", "1", poster_png,
+        "-vf", vf, "-frames:v", "1", poster_png,
     ], check=True)
     Image.open(poster_png).convert("RGBA").save(
         os.path.join(OUT_IMG, f"{slug}-poster.webp"), "WEBP", quality=QUALITY, method=6)
