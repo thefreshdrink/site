@@ -72,41 +72,46 @@
   }
 
   if (phone.matches) {
-    // 5heads-style scattered feed: one flat sequence (series order kept, the
-    // grouping just isn't shown visually), packed into rows of 1-2 columns.
-    // A column can stack 2 items — since .mrow uses align-items:flex-start,
-    // a column that finishes first just leaves black behind it instead of
-    // stretching, which is exactly where the reference's black voids come
-    // from. Corner radius alternates 0/60, the reference's own two-value mix.
-    var ROW_TEMPLATES = [
-      [{ w: 100, n: 1 }],
-      [{ w: 45, n: 1 }, { w: 55, n: 1 }],
-      [{ w: 38, n: 2 }, { w: 62, n: 1 }],
-      [{ w: 62, n: 1 }, { w: 38, n: 1 }],
-      [{ w: 100, n: 1 }],
-      [{ w: 55, n: 1 }, { w: 45, n: 2 }],
-      [{ w: 30, n: 1 }, { w: 70, n: 1 }],
-      [{ w: 70, n: 1 }, { w: 30, n: 2 }],
+    // hand-authored feed, matching the Figma "Frame 23" mockup exactly: exact
+    // row grouping, column widths and per-tile corner radius. Referenced by
+    // each work's stable `key` (the COLUMNS/VIDEOS token in build.py), not its
+    // slug — the slug's numeric suffix drifts with every re-export, the key
+    // doesn't. A row is one full-width entry, or a [left, right] pair.
+    var worksByKey = {};
+    SITE.columns.forEach(function (c) { c.works.forEach(function (w) { worksByKey[w.key] = w; }); });
+
+    var MOBILE_LAYOUT = [
+      { full: { key: "petals-coral-veo3", radius: 0 } },
+      { full: { key: "IMG_2159", radius: 0 } },
+      { full: { key: "494370BC", radius: 0 } },
+      { pair: [{ key: "Frame 21", w: 38, radius: 999 }, { key: "sea view rock", w: 62, radius: 60 }] },
+      { full: { key: "swinwarrior1998", radius: 0 } },
+      { pair: [{ key: "image 67", w: 38, radius: 0 }, { key: "image 68", w: 62, radius: 60 }] },
+      { full: { key: "A4 - 28 (3)", radius: 0 } },
+      { pair: [{ key: "untitled", w: 38, radius: 0 }, { key: "IMG_0041", w: 62, radius: 60 }] },
+      { full: { key: "camphoto_351212254", radius: 0 } },
+      { pair: [{ key: "type-w", w: 38, radius: 0 }, { key: "lux_1", w: 62, radius: 0 }] },
+      { full: { key: "just a regular rock", radius: 60 } },
+      { full: { key: "Double_Poster_Mockup", radius: 0 } },
+      { pair: [{ key: "image 70", w: 38, radius: 0 }, { key: "photo_2022-04-30", w: 62, radius: 60 }] },
+      { full: { key: "IMG_2659", radius: 0 } },
     ];
-    var RADII = [0, 60, 0, 0, 60, 0];
-    var works = [];
-    SITE.columns.forEach(function (c) { c.works.forEach(function (w) { works.push(w); }); });
-    var ti = 0, wi = 0;
-    while (wi < works.length) {
-      var tmpl = ROW_TEMPLATES[ti++ % ROW_TEMPLATES.length];
+
+    MOBILE_LAYOUT.forEach(function (rowSpec) {
       var row = document.createElement("div");
       row.className = "mrow";
-      for (var c = 0; c < tmpl.length && wi < works.length; c++) {
+      var cells = rowSpec.pair || [Object.assign({ w: 100 }, rowSpec.full)];
+      cells.forEach(function (cell) {
+        var work = worksByKey[cell.key];
+        if (!work) return;   // a piece pulled from Figma but not yet in rt/ — skip, don't break the page
         var col = document.createElement("div");
         col.className = "mcol";
-        col.style.flex = tmpl[c].w + " 1 0%";
-        for (var n = 0; n < tmpl[c].n && wi < works.length; n++, wi++) {
-          col.appendChild(buildTile(works[wi], RADII[flat.length % RADII.length]));
-        }
+        col.style.flex = cell.w + " 1 0%";
+        col.appendChild(buildTile(work, cell.radius));
         row.appendChild(col);
-      }
-      board.appendChild(row);
-    }
+      });
+      if (row.children.length) board.appendChild(row);
+    });
   } else {
     var z = 0;
     SITE.columns.forEach(function (column) {

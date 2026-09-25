@@ -15,15 +15,18 @@ window.SITE = {
         {
           "slug": "petals-coral-veo3",
           "ar": 1.3324,
-          "video": true
+          "video": true,
+          "key": "petals-coral-veo3"
         },
         {
           "slug": "lux-1-2",
-          "ar": 1.7778
+          "ar": 0.5626,
+          "key": "lux_1"
         },
         {
           "slug": "img-2159-1",
-          "ar": 1.3333
+          "ar": 1.3333,
+          "key": "IMG_2159"
         }
       ]
     },
@@ -31,16 +34,14 @@ window.SITE = {
       "label": "club room",
       "works": [
         {
-          "slug": "494370bc-1962-46a6-b7f1-067a058d6f9b-1",
-          "ar": 1.0
+          "slug": "494370bc-1962-46a6-b7f1-067a058d6f9b-2",
+          "ar": 1.0,
+          "key": "494370BC"
         },
         {
-          "slug": "subrosa-4-1",
-          "ar": 1.0
-        },
-        {
-          "slug": "a4-28-3-1",
-          "ar": 0.9993
+          "slug": "a4-28-3-3",
+          "ar": 0.9992,
+          "key": "A4 - 28 (3)"
         }
       ]
     },
@@ -48,20 +49,19 @@ window.SITE = {
       "label": "prostor",
       "works": [
         {
-          "slug": "swinwarrior1998-2",
-          "ar": 1.0
+          "slug": "swinwarrior1998-3",
+          "ar": 1.2557,
+          "key": "swinwarrior1998"
         },
         {
           "slug": "image-67",
-          "ar": 1.3333
-        },
-        {
-          "slug": "image-53",
-          "ar": 1.0089
+          "ar": 0.8744,
+          "key": "image 67"
         },
         {
           "slug": "image-68",
-          "ar": 1.3333
+          "ar": 1.4814,
+          "key": "image 68"
         }
       ]
     },
@@ -71,23 +71,28 @@ window.SITE = {
         {
           "slug": "type-w",
           "ar": 1.2263,
-          "video": true
+          "video": true,
+          "key": "type-w"
         },
         {
-          "slug": "just-a-regular-rock-1",
-          "ar": 1.0
+          "slug": "just-a-regular-rock-2",
+          "ar": 1.0,
+          "key": "just a regular rock"
         },
         {
-          "slug": "double-poster-mockup-1",
-          "ar": 1.7549
+          "slug": "double-poster-mockup-2",
+          "ar": 1.7572,
+          "key": "Double_Poster_Mockup"
         },
         {
-          "slug": "photo-2022-04-30-01-28-01-1",
-          "ar": 1.0
+          "slug": "photo-2022-04-30-01-28-01-2",
+          "ar": 1.0,
+          "key": "photo_2022-04-30"
         },
         {
-          "slug": "sea-view-rock-1",
-          "ar": 1.0
+          "slug": "sea-view-rock-2",
+          "ar": 0.9985,
+          "key": "sea view rock"
         }
       ]
     },
@@ -95,24 +100,34 @@ window.SITE = {
       "label": "jinx bomb",
       "works": [
         {
-          "slug": "img-6242-1",
-          "ar": 1.7549
-        },
-        {
-          "slug": "frame-21-1",
-          "ar": 1.0
+          "slug": "frame-21-2",
+          "ar": 1.0,
+          "key": "Frame 21"
         },
         {
           "slug": "untitled-2024-05-13-12-05-40-utc-1",
-          "ar": 1.2634
+          "ar": 1.2635,
+          "key": "untitled"
         },
         {
-          "slug": "camphoto-351212254-1",
-          "ar": 1.0
+          "slug": "img-0041-1",
+          "ar": 0.6447,
+          "key": "IMG_0041"
         },
         {
-          "slug": "img-2659-1",
-          "ar": 1.2816
+          "slug": "image-70",
+          "ar": 0.4634,
+          "key": "image 70"
+        },
+        {
+          "slug": "camphoto-351212254-3",
+          "ar": 1.0,
+          "key": "camphoto_351212254"
+        },
+        {
+          "slug": "img-2659-2",
+          "ar": 1.2815,
+          "key": "IMG_2659"
         }
       ]
     }

@@ -43,12 +43,13 @@ VIDEO_CRF = 28
 # frame pairs petals with lux_1, and jinx-bomb pieces with the 3d ones.
 COLUMNS = [
     ("petals",    ["lux_1", "IMG_2159"]),
-    ("club room", ["494370BC", "subrosa (4)", "A4 - 28 (3)"]),
-    ("prostor",   ["swinwarrior1998", "image 67", "image 53", "image 68"]),
+    ("club room", ["494370BC", "A4 - 28 (3)"]),
+    ("prostor",   ["swinwarrior1998", "image 67", "image 68"]),
     ("posters",   ["just a regular rock", "Double_Poster_Mockup", "photo_2022-04-30", "sea view rock"]),
-    ("jinx bomb", ["IMG_6242", "Frame 21", "untitled", "camphoto_351212254", "IMG_2659"]),
+    ("jinx bomb", ["Frame 21", "untitled", "IMG_0041", "image 70", "camphoto_351212254", "IMG_2659"]),
 ]
-EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", "image 51", "image 60"]
+EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", "image 51", "image 60",
+           "subrosa (4)", "image 53", "IMG_6242", "Frame 23"]
 
 # video works: label -> ordered list of rt_video/*.mp4 tokens (same substring
 # match as COLUMNS), optionally with a 3rd "start" element to prepend instead
@@ -210,7 +211,9 @@ def main():
         for t in tokens:
             path = match(t)
             used.add(path)
-            picked.append(encode(path))
+            work = encode(path)
+            work["key"] = t          # stable id for MOBILE_LAYOUT in app.js — survives re-exports
+            picked.append(work)
             print(f"  {label:10}  {os.path.basename(path)}")
         works_by_label[label] = picked
 
@@ -222,7 +225,9 @@ def main():
         for t in tokens:
             path = match_video(t)
             used_video.add(path)
-            new_works.append(encode_video(path))
+            work = encode_video(path)
+            work["key"] = t
+            new_works.append(work)
             print(f"  {label:10}  {os.path.basename(path)} (video)")
         works_by_label[label] = new_works + existing if position == "start" else existing + new_works
 
