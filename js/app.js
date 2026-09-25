@@ -36,13 +36,13 @@
 
   /* ---- build --------------------------------------------------------------
      a tile is shared by both layouts; only its container differs. */
-  function buildTile(work, radius) {
+  function buildTile(work, radius, arOverride) {
     var idx = flat.length;
     var tile = document.createElement("button");
     tile.type = "button";
     tile.className = "tile";
-    tile.style.setProperty("--ar", String(work.ar || 1));
-    if (radius != null) tile.style.borderRadius = radius + "px";
+    tile.style.setProperty("--ar", String(arOverride || work.ar || 1));
+    if (radius != null) tile.style.borderRadius = typeof radius === "string" ? radius : radius + "px";
     tile.setAttribute("aria-label", "открыть работу");
 
     if (work.video) {
@@ -72,42 +72,61 @@
   }
 
   if (phone.matches) {
-    // hand-authored feed, matching the Figma "Frame 23" mockup exactly: exact
-    // row grouping, column widths and per-tile corner radius. Referenced by
-    // each work's stable `key` (the COLUMNS/VIDEOS token in build.py), not its
-    // slug — the slug's numeric suffix drifts with every re-export, the key
-    // doesn't. A row is one full-width entry, or a [left, right] pair.
+    // hand-authored feed, matching the Figma "Frame 23" mockup exactly. Every
+    // width/margin/radius below came from the frame's own exported SVG (exact
+    // <rect x y width height rx>), not eyeballing — a rotated rect (Figma's
+    // way of fitting a portrait image, e.g. lux_1) is pre-resolved to its
+    // effective on-screen box. Percentages are of the 4096px-wide frame.
+    // Referenced by each work's stable `key` (the COLUMNS/VIDEOS token in
+    // build.py), not its slug — the slug's numeric suffix drifts with every
+    // re-export, the key doesn't.
     var worksByKey = {};
     SITE.columns.forEach(function (c) { c.works.forEach(function (w) { worksByKey[w.key] = w; }); });
 
+    var CIRCLE = "50%";
     var MOBILE_LAYOUT = [
-      { full: { key: "petals-coral-veo3", radius: 0 } },
-      { full: { key: "IMG_2159", radius: 0 } },
-      { full: { key: "494370BC", radius: 0 } },
-      { pair: [{ key: "Frame 21", w: 38, radius: 999 }, { key: "sea view rock", w: 62, radius: 60 }] },
-      { full: { key: "swinwarrior1998", radius: 0 } },
-      { pair: [{ key: "image 67", w: 38, radius: 0 }, { key: "image 68", w: 62, radius: 60 }] },
-      { full: { key: "A4 - 28 (3)", radius: 0 } },
-      { pair: [{ key: "untitled", w: 38, radius: 0 }, { key: "IMG_0041", w: 62, radius: 60 }] },
-      { full: { key: "camphoto_351212254", radius: 0 } },
-      { pair: [{ key: "type-w", w: 38, radius: 0 }, { key: "lux_1", w: 62, radius: 0 }] },
-      { full: { key: "just a regular rock", radius: 60 } },
-      { full: { key: "Double_Poster_Mockup", radius: 0 } },
-      { pair: [{ key: "image 70", w: 38, radius: 0 }, { key: "photo_2022-04-30", w: 62, radius: 60 }] },
-      { full: { key: "IMG_2659", radius: 0 } },
+      { cells: [{ key: "petals-coral-veo3", w: 100, radius: 0 }] },
+      { cells: [{ key: "IMG_2159", w: 100, radius: 0 }] },
+      { cells: [{ key: "494370BC", w: 76.5, radius: 0 }] },
+      { cells: [
+        { key: "Frame 21", w: 50.0, radius: CIRCLE },
+        { key: "sea view rock", w: 50.0, radius: 0 },
+      ] },
+      { cells: [{ key: "swinwarrior1998", w: 100, radius: 0 }] },
+      { cells: [
+        { key: "image 67", w: 37.2, radius: 16 },
+        { key: "image 68", w: 63.0, radius: 55 },
+      ] },
+      { cells: [{ key: "A4 - 28 (3)", w: 61.0, ml: 19.5, radius: 16 }] },
+      { cells: [
+        { key: "untitled", w: 66.6, radius: 16 },
+        { key: "IMG_0041", w: 33.4, radius: 37 },
+      ] },
+      { cells: [{ key: "camphoto_351212254", w: 82.6, ml: 17.4, radius: 0 }] },
+      { cells: [
+        { key: "type-w", w: 62.8, radius: 0, ar: 1 },
+        { key: "lux_1", w: 35.3, radius: 16 },
+      ] },
+      { cells: [{ key: "just a regular rock", w: 70.6, ml: 28.3, radius: 0 }] },
+      { cells: [{ key: "Double_Poster_Mockup", w: 100, radius: 16 }] },
+      { cells: [
+        { key: "image 70", w: 29.25, ml: 4.5, radius: 0 },
+        { key: "photo_2022-04-30", w: 63.1, ml: 2.0, radius: 16 },
+      ] },
+      { cells: [{ key: "IMG_2659", w: 64.6, radius: 0 }] },
     ];
 
     MOBILE_LAYOUT.forEach(function (rowSpec) {
       var row = document.createElement("div");
       row.className = "mrow";
-      var cells = rowSpec.pair || [Object.assign({ w: 100 }, rowSpec.full)];
-      cells.forEach(function (cell) {
+      rowSpec.cells.forEach(function (cell) {
         var work = worksByKey[cell.key];
         if (!work) return;   // a piece pulled from Figma but not yet in rt/ — skip, don't break the page
         var col = document.createElement("div");
         col.className = "mcol";
-        col.style.flex = cell.w + " 1 0%";
-        col.appendChild(buildTile(work, cell.radius));
+        col.style.flex = "0 0 " + cell.w + "%";
+        if (cell.ml) col.style.marginLeft = cell.ml + "%";
+        col.appendChild(buildTile(work, cell.radius, cell.ar));
         row.appendChild(col);
       });
       if (row.children.length) board.appendChild(row);
