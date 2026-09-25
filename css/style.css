@@ -157,6 +157,7 @@ main{position:relative;z-index:1}
 
   .board{
     display:flex;flex-direction:column;
+    gap:0;                     /* the desktop rule's gap:clamp(24px,…) otherwise leaks through */
     padding:118px 0 140px;
     overflow:visible;
   }

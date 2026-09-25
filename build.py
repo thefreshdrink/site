@@ -46,17 +46,19 @@ COLUMNS = [
     ("club room", ["494370BC", "A4 - 28 (3)"]),
     ("prostor",   ["swinwarrior1998", "image 67", "image 68"]),
     ("posters",   ["just a regular rock", "Double_Poster_Mockup", "photo_2022-04-30", "sea view rock"]),
-    ("jinx bomb", ["Frame 21", "untitled", "IMG_0041", "image 70", "camphoto_351212254", "IMG_2659"]),
+    ("jinx bomb", ["Frame 21", "IMG_0041", "image 70", "camphoto_351212254", "IMG_2659"]),
 ]
 EXCLUDE = ["9757D019", "MOCKUP-01", "image 50", "abstrakt_cover", "Frame 1907", "image 51", "image 60",
-           "subrosa (4)", "image 53", "IMG_6242", "Frame 23"]
+           "subrosa (4)", "image 53", "IMG_6242", "Frame 23", "2024_05_13"]
 
-# video works: label -> ordered list of rt_video/*.mp4 tokens (same substring
-# match as COLUMNS), optionally with a 3rd "start" element to prepend instead
-# of append (matches the piece's position among its column's Figma siblings).
+# video works: label -> ordered list of rt_video/*.mp4|mov tokens (same
+# substring match as COLUMNS), optionally with a 3rd "start" element to
+# prepend instead of append (matches the piece's position among its
+# column's Figma siblings).
 VIDEOS = [
     ("posters", ["type-w"], "start"),
     ("petals", ["petals-coral-veo3"], "start"),
+    ("jinx bomb", ["untitled-house"], "start"),
 ]
 
 # some generator exports pillarbox/letterbox a vertical render into a 16:9
@@ -196,7 +198,10 @@ def main():
             raise SystemExit(f"COLUMNS token {token!r} matched {len(hits)} files: {[os.path.basename(h) for h in hits]}")
         return hits[0]
 
-    video_files = sorted(glob.glob(os.path.join(VIDEO_SRC, "*.mp4"))) if os.path.isdir(VIDEO_SRC) else []
+    video_files = sorted(
+        glob.glob(os.path.join(VIDEO_SRC, "*.mp4")) + glob.glob(os.path.join(VIDEO_SRC, "*.mov")) +
+        glob.glob(os.path.join(VIDEO_SRC, "*.MOV"))
+    ) if os.path.isdir(VIDEO_SRC) else []
 
     def match_video(token):
         hits = [f for f in video_files if token.lower() in os.path.basename(f).lower()]

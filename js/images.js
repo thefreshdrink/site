@@ -100,14 +100,15 @@ window.SITE = {
       "label": "jinx bomb",
       "works": [
         {
+          "slug": "untitled-house",
+          "ar": 1.2632,
+          "video": true,
+          "key": "untitled-house"
+        },
+        {
           "slug": "frame-21-2",
           "ar": 1.0,
           "key": "Frame 21"
-        },
-        {
-          "slug": "untitled-2024-05-13-12-05-40-utc-1",
-          "ar": 1.2635,
-          "key": "untitled"
         },
         {
           "slug": "img-0041-1",

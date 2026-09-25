@@ -86,7 +86,6 @@
     var CIRCLE = "50%";
     var MOBILE_LAYOUT = [
       { cells: [{ key: "petals-coral-veo3", w: 100, radius: 0 }] },
-      { cells: [{ key: "IMG_2159", w: 100, radius: 0 }] },
       { cells: [{ key: "494370BC", w: 76.5, radius: 0 }] },
       { cells: [
         { key: "Frame 21", w: 50.0, radius: CIRCLE },
@@ -99,7 +98,7 @@
       ] },
       { cells: [{ key: "A4 - 28 (3)", w: 61.0, ml: 19.5, radius: 16 }] },
       { cells: [
-        { key: "untitled", w: 66.6, radius: 16 },
+        { key: "untitled-house", w: 66.6, radius: 16 },
         { key: "IMG_0041", w: 33.4, radius: 37 },
       ] },
       { cells: [{ key: "camphoto_351212254", w: 82.6, ml: 17.4, radius: 0 }] },
