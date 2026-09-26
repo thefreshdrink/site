@@ -6,7 +6,9 @@ assets/img/ (keeping the alpha — the exports already carry rounded corners, so
 we never paint a background behind them), and emits js/images.js, the manifest
 the page reads.
 
-Run:  python3 build.py
+Run:  python3 build.py           full rebuild (images, video, manifest, stamp)
+      python3 build.py --stamp   only re-stamp index.html — run before every
+                                 deploy that touches css/js without new art
 Needs: Pillow  (pip install pillow)
 """
 import glob
@@ -278,7 +280,31 @@ def main():
         fh.write("window.SITE = " + json.dumps(manifest, ensure_ascii=False, indent=2) + ";\n")
     total = sum(len(c["works"]) for c in columns)
     print(f"\nwrote js/images.js — {len(columns)} columns, {total} works")
+    stamp()
+
+
+STAMPED = ("css/style.css", "js/images.js", "js/app.js")
+
+
+def stamp():
+    """GitHub Pages serves everything with max-age=600, so a phone can pair a
+    fresh index.html with a stale app.js/style.css and lose new behaviour.
+    Tag each asset link with a hash of its contents so every change is a new
+    URL the browser has never cached."""
+    import hashlib
+    path = os.path.join(ROOT, "index.html")
+    with open(path) as fh:
+        html = fh.read()
+    for rel in STAMPED:
+        with open(os.path.join(ROOT, rel), "rb") as fh:
+            digest = hashlib.sha1(fh.read()).hexdigest()[:8]
+        html, n = re.subn(r'"%s(\?v=[0-9a-f]+)?"' % re.escape(rel), f'"{rel}?v={digest}"', html)
+        assert n == 1, f"index.html should reference {rel} exactly once, found {n}"
+        print(f"  stamped {rel}?v={digest}")
+    with open(path, "w") as fh:
+        fh.write(html)
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    stamp() if "--stamp" in sys.argv else main()
