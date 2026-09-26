@@ -218,8 +218,8 @@
   var win = document.getElementById("win");
   var winBody = document.getElementById("win-body");
   var WIN_COPY = {
-    luck: "<p>заглушка — тут пока рандомный текст, форма важнее содержания.</p><p>потом здесь будет что-то своё.</p>",
-    contact: "<p>вторая заглушка того же окна.</p><p>сюда позже ляжет то, что решишь оставить вместо контактов.</p>"
+    luck: "<p>you are lucky to know that</p><p>this is my creative archive since 2020</p><p>it’s a pleasure to see you there</p>",
+    contact: "<p>seriously</p><p>don’t call me</p><p>i’m busy</p>"
   };
   function openWin(key) {
     winBody.innerHTML = WIN_COPY[key] || "";
