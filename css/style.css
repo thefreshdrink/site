@@ -73,8 +73,10 @@ main{position:relative;z-index:1}
   pointer-events:none;
   mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
 }
-.mbar-top{top:0;align-items:flex-start;justify-content:flex-start}
-.mbar-bot{bottom:0;align-items:flex-end;justify-content:flex-end}
+/* both tap-windows live in the top bar now, left/right corners — the bottom
+   bar carries only the mark (mbar-mark), see "iPhone 16 - 1" reference */
+.mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px}
+.mbar-bot{bottom:0;align-items:flex-end;justify-content:center}
 .mbar .mtxt{
   pointer-events:auto;
   appearance:none;-webkit-appearance:none;border:0;background:transparent;
@@ -83,8 +85,10 @@ main{position:relative;z-index:1}
   text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
   color:#fff;cursor:pointer;padding:0;text-align:left;margin:0;
 }
-.mbar-bot .mtxt{text-align:right}
+.mbar .mtxt-r{text-align:right}
 .mbar .mtxt span{display:block}
+
+.mbar-mark{display:block;width:100%;height:auto;pointer-events:none}
 
 /* ---- board (wide screens) — horizontal kanban ----------------------------- */
 .board{
@@ -199,6 +203,41 @@ main{position:relative;z-index:1}
 .lb-next{right:16px;top:50%;transform:translateY(-50%)}
 .lb-close{top:16px;right:16px;width:40px;height:40px;font-size:15px}
 @media (max-width:760px), (pointer:coarse) and (max-height:760px){.lb-prev,.lb-next{display:none}}
+
+/* ---- tap-windows (mtxt -> win) — a 5heads-style card over a blurred backdrop.
+   Content is placeholder for now (form over copy — see index.html comment). */
+.win{
+  position:fixed;inset:0;z-index:110;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  background:rgba(14,14,16,.82);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  cursor:zoom-out;
+}
+.win[hidden]{display:none}
+.win-card{
+  position:relative;
+  width:min(420px,100%);
+  max-height:80vh;overflow:auto;
+  background:#1c1d22;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:40px 28px 32px;
+  cursor:default;
+}
+.win-close{
+  position:absolute;top:14px;right:14px;
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:999px;border:0;
+  background:rgba(255,255,255,.09);color:var(--ink);
+  font-size:14px;line-height:1;cursor:pointer;transition:background .16s;
+}
+.win-close:hover{background:rgba(255,255,255,.17)}
+.win-body{
+  font-size:17px;line-height:1.5;color:var(--ink);
+}
+.win-body p{margin:0 0 14px}
+.win-body p:last-child{margin-bottom:0}
 
 /* ---- a11y / motion --------------------------------------------------------- */
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}

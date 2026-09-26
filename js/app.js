@@ -163,6 +163,10 @@
   }, { passive: false });
 
   addEventListener("keydown", function (e) {
+    if (!win.hidden) {
+      if (e.key === "Escape") closeWin();
+      return;
+    }
     if (!lb.hidden) {
       if (e.key === "Escape") closeLightbox();
       else if (e.key === "ArrowLeft") step(-1);
@@ -208,6 +212,30 @@
     }, { threshold: 0.15 });
     videoTiles.forEach(function (v) { vio.observe(v); });
   }
+
+  /* ---- tap-windows (mtxt -> win) — 5heads-style card, placeholder copy for now:
+     form first, Alisa fills in the real text/links per data-win key later. */
+  var win = document.getElementById("win");
+  var winBody = document.getElementById("win-body");
+  var WIN_COPY = {
+    luck: "<p>заглушка — тут пока рандомный текст, форма важнее содержания.</p><p>потом здесь будет что-то своё.</p>",
+    contact: "<p>вторая заглушка того же окна.</p><p>сюда позже ляжет то, что решишь оставить вместо контактов.</p>"
+  };
+  function openWin(key) {
+    winBody.innerHTML = WIN_COPY[key] || "";
+    win.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closeWin() {
+    win.hidden = true;
+    document.body.style.overflow = "";
+  }
+  [].slice.call(document.querySelectorAll(".mtxt[data-win]")).forEach(function (btn) {
+    btn.addEventListener("click", function () { openWin(btn.dataset.win); });
+  });
+  win.addEventListener("click", function (e) {
+    if (e.target === win || e.target.classList.contains("win-close")) closeWin();
+  });
 
   /* ---- lightbox --------------------------------------------------------------- */
   var lb = document.getElementById("lb");

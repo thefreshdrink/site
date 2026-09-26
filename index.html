@@ -26,11 +26,20 @@
 
   <!-- phone chrome -->
   <header class="mbar mbar-top">
-    <button type="button" class="mtxt"><span>wtf</span><span>is this?</span></button>
+    <button type="button" class="mtxt" data-win="luck"><span>tap</span><span>for luck</span></button>
+    <button type="button" class="mtxt mtxt-r" data-win="contact"><span>please</span><span>don't call me</span></button>
   </header>
   <footer class="mbar mbar-bot">
-    <button type="button" class="mtxt"><span>please</span><span>don't call me</span></button>
+    <img class="mbar-mark" src="assets/mark-bottom.svg" alt="" aria-hidden="true">
   </footer>
+
+  <!-- mtxt tap-windows — placeholder copy, form over content for now -->
+  <div class="win" id="win" hidden>
+    <div class="win-card">
+      <button class="win-close" aria-label="закрыть">✕</button>
+      <div class="win-body" id="win-body"></div>
+    </div>
+  </div>
 
   <div class="lb" id="lb" hidden>
     <button class="lb-btn lb-close" aria-label="закрыть">✕</button>
