@@ -219,7 +219,7 @@ main{position:relative;z-index:1}
 .win[hidden]{display:none}
 .win-card{
   position:relative;
-  width:max-content;max-width:100%;
+  width:100%;max-width:360px;
   max-height:80vh;overflow:auto;
   background:rgba(235,236,238,.3);
   -webkit-backdrop-filter:blur(30px) saturate(180%) brightness(1.25);
