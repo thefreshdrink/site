@@ -168,8 +168,10 @@ main{position:relative;z-index:1}
   .mrow{display:flex;align-items:flex-start}
   .mcol{display:flex;flex-direction:column;min-width:0}
 
-  .tile{width:100%;box-shadow:none}
+  .tile{width:100%;box-shadow:none;transition:opacity .3s ease-out}
   /* radius is set inline per-tile by app.js (0 or 60) — no CSS override needed */
+  /* 5heads.ai reveal: plain opacity fade, no blur/shift — overrides the desktop .tile.reveal */
+  .tile.reveal{filter:none;opacity:0;transform:none}
 }
 
 /* ---- lightbox -------------------------------------------------------------------- */
