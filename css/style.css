@@ -247,10 +247,11 @@ main{position:relative;z-index:1}
 }
 .win-body p{margin:0 0 2px;white-space:nowrap}
 .win-body p:last-child{margin-bottom:0}
-.win[data-key="contact"] .win-body{transform:translateY(6px)}
+.win-body{transform:translateY(6px)}
+/* the last row (<3 / telegram) sits at the same height in every window */
+.win-row{display:inline-flex;align-items:center;height:18px;margin-top:18px}
 .win-link{
-  display:inline-flex;align-items:center;gap:8px;
-  margin-top:18px;
+  gap:8px;
   font-size:14px;color:#000;
   text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;
 }

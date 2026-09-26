@@ -217,16 +217,15 @@
      form first, Alisa fills in the real text/links per data-win key later. */
   var win = document.getElementById("win");
   var winBody = document.getElementById("win-body");
-  var TG_URL = "https://t.me/";  // TODO: Alisa's handle
   var TG_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.8 19c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.6 12.8l-4.7-1.5c-1-.3-1-1 .2-1.5L20.5 2.7c.9-.3 1.6.2 1.4 1.6z"/></svg>';
   var WIN_COPY = {
-    luck: "<p>you are lucky to know that</p><p>this is my creative archive since 2020.</p><p>it’s a pleasure to see you there &lt;3</p>",
+    luck: "<p>you are lucky to know that</p><p>this is my creative archive since 2020.</p><p>it’s a pleasure to see you there</p>" +
+      '<span class="win-row">&lt;3</span>',
     contact: "<p>seriously, don’t call me</p><p>but…</p><p>you might text me</p>" +
-      '<a class="win-link" href="' + TG_URL + '" target="_blank" rel="noopener">' + TG_ICON + "<span>telegram</span></a>"
+      '<a class="win-row win-link">' + TG_ICON + "<span>telegram</span></a>"
   };
   function openWin(key) {
     winBody.innerHTML = WIN_COPY[key] || "";
-    win.dataset.key = key;
     win.hidden = false;
     document.body.style.overflow = "hidden";
   }
