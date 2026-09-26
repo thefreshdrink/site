@@ -82,13 +82,21 @@ def slugify(path):
     return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
 
 
-def restore_corner_alpha(im, tolerance=6, scan=300):
+def restore_corner_alpha(im, tolerance=6, scan=300, max_area_frac=0.12):
     """Figma's node export bakes the page background into a frame's rounded
     corners instead of leaving them transparent (only affects assets pulled
     via the Figma MCP — the original hand-exported PNGs already have real
     alpha there). Flood-fill each corner from the page-background colour back
     to alpha 0, so a rounded frame reads as rounded again instead of showing
-    a square matte. A no-op on images that already have real transparency."""
+    a square matte. A no-op on images that already have real transparency.
+
+    A plain photo can false-positive this: if its corner happens to sit in a
+    smooth, near-uniform patch (e.g. a soft sky), the flood spreads through
+    that whole patch and punches a ragged hole instead of a small rounded
+    corner (seen on swinwarrior1998-3, whose top-left cloud got eaten). A
+    real rounded-corner cut is a small arc near the corner, so cap how much
+    of the scan window one flood may claim and skip corners that blow past
+    it — read-only BFS first, mutate only once the region passes the cap."""
     w, h = im.size
     px = im.load()
     if px[0, 0][3] != 255:
@@ -102,24 +110,30 @@ def restore_corner_alpha(im, tolerance=6, scan=300):
         if not close(px[cx, cy][:3]):
             continue
         sw, sh = min(scan, w), min(scan, h)
+        cap = sw * sh * max_area_frac
         x0 = 0 if dx == 1 else w - sw
         y0 = 0 if dy == 1 else h - sh
         start = (cx - x0, cy - y0)
         seen = [[False] * sw for _ in range(sh)]
         seen[start[1]][start[0]] = True
+        region = [start]
         q = deque([start])
-        while q:
+        while q and len(region) <= cap:
             lx, ly = q.popleft()
-            gx, gy = lx + x0, ly + y0
-            r, g, b, _ = px[gx, gy]
-            px[gx, gy] = (r, g, b, 0)
             for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nx, ny = lx + ddx, ly + ddy
                 if 0 <= nx < sw and 0 <= ny < sh and not seen[ny][nx]:
                     ngx, ngy = nx + x0, ny + y0
                     if close(px[ngx, ngy][:3]):
                         seen[ny][nx] = True
+                        region.append((nx, ny))
                         q.append((nx, ny))
+        if len(region) > cap:
+            continue  # too big to be a rounded corner — a real photo patch, leave it opaque
+        for lx, ly in region:
+            gx, gy = lx + x0, ly + y0
+            r, g, b, _ = px[gx, gy]
+            px[gx, gy] = (r, g, b, 0)
     return im
 
 
