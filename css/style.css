@@ -245,6 +245,7 @@ main{position:relative;z-index:1}
 }
 .win-body p{margin:0 0 2px;white-space:nowrap}
 .win-body p:last-child{margin-bottom:0}
+.win[data-key="contact"] .win-body{transform:translateY(6px)}
 .win-link{
   display:inline-flex;align-items:center;gap:8px;
   margin-top:18px;

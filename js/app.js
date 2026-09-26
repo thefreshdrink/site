@@ -226,6 +226,7 @@
   };
   function openWin(key) {
     winBody.innerHTML = WIN_COPY[key] || "";
+    win.dataset.key = key;
     win.hidden = false;
     document.body.style.overflow = "hidden";
   }
