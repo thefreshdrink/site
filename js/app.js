@@ -1,6 +1,6 @@
-/* alisik — portfolio front-end
-   builds the kanban board of columns from window.SITE, wires horizontal-wheel
-   scrolling, the scroll reveal, and the lightbox.
+/* creative_archive_2020 — front-end
+   builds the collage feed from window.SITE, wires the scroll reveal, the
+   tap-windows and the lightbox.
 --------------------------------------------------------------------------- */
 (function () {
   "use strict";
@@ -10,20 +10,13 @@
   function toTop() { window.scrollTo(0, 0); }
   addEventListener("load", function () { toTop(); requestAnimationFrame(toTop); setTimeout(toTop, 120); });
 
-  // a narrow viewport, or any touch device gone short (a phone rotated to
-  // landscape) — keep in sync with the mobile @media queries in style.css
-  var BREAKPOINT = "(max-width:760px), (pointer:coarse) and (max-height:760px)";
-  var phone = window.matchMedia(BREAKPOINT);
-
   var board = document.getElementById("board");
-  if (phone.matches) board.removeAttribute("tabindex");
   var base = SITE.imgBase;
   var videoBase = SITE.videoBase;
   var widths = SITE.widths;
   var hi = widths[widths.length - 1];
 
   var flat = [];        // every work, DOM order — the lightbox walks this
-  var colEls = [];
 
   function srcset(slug) {
     return widths.map(function (w) {
@@ -34,8 +27,7 @@
   function poster(slug) { return base + "/" + slug + "-poster.webp"; }
   function videoSrc(slug) { return videoBase + "/" + slug + ".mp4"; }
 
-  /* ---- build --------------------------------------------------------------
-     a tile is shared by both layouts; only its container differs. */
+  /* ---- build -------------------------------------------------------------- */
   function buildTile(work, radius, arOverride) {
     var idx = flat.length;
     var tile = document.createElement("button");
@@ -62,7 +54,7 @@
       img.decoding = "async";
       img.src = src(work.slug);
       img.srcset = srcset(work.slug);
-      img.sizes = "(max-width:760px) 100vw, 32vw";
+      img.sizes = "(max-width:680px) 100vw, 680px";
       tile.appendChild(img);
     }
 
@@ -71,96 +63,64 @@
     return tile;
   }
 
-  if (phone.matches) {
-    // hand-authored feed, matching the Figma "Frame 23" mockup exactly. Every
-    // width/margin/radius below came from the frame's own exported SVG (exact
-    // <rect x y width height rx>), not eyeballing — a rotated rect (Figma's
-    // way of fitting a portrait image, e.g. lux_1) is pre-resolved to its
-    // effective on-screen box. Percentages are of the 4096px-wide frame.
-    // Referenced by each work's stable `key` (the COLUMNS/VIDEOS token in
-    // build.py), not its slug — the slug's numeric suffix drifts with every
-    // re-export, the key doesn't.
-    var worksByKey = {};
-    SITE.columns.forEach(function (c) { c.works.forEach(function (w) { worksByKey[w.key] = w; }); });
+  // hand-authored feed, matching the Figma "Frame 23" mockup exactly. Every
+  // width/margin/radius below came from the frame's own exported SVG (exact
+  // <rect x y width height rx>), not eyeballing — a rotated rect (Figma's
+  // way of fitting a portrait image, e.g. lux_1) is pre-resolved to its
+  // effective on-screen box. Percentages are of the 4096px-wide frame.
+  // Referenced by each work's stable `key` (the COLUMNS/VIDEOS token in
+  // build.py), not its slug — the slug's numeric suffix drifts with every
+  // re-export, the key doesn't.
+  var worksByKey = {};
+  SITE.columns.forEach(function (c) { c.works.forEach(function (w) { worksByKey[w.key] = w; }); });
 
-    var CIRCLE = "50%";
-    var MOBILE_LAYOUT = [
-      { cells: [{ key: "petals-coral-veo3", w: 100, radius: 0 }] },
-      { cells: [{ key: "494370BC", w: 76.5, radius: 0 }] },
-      { cells: [
-        { key: "Frame 21", w: 50.0, radius: CIRCLE },
-        { key: "sea view rock", w: 50.0, radius: 0 },
-      ] },
-      { cells: [{ key: "swinwarrior1998", w: 100, radius: 0 }] },
-      { cells: [
-        { key: "image 67", w: 37.2, radius: 16 },
-        { key: "image 68", w: 63.0, radius: 55 },
-      ] },
-      { cells: [{ key: "A4 - 28 (3)", w: 61.0, ml: 19.5, radius: 16 }] },
-      { cells: [
-        { key: "untitled-house", w: 66.6, radius: 16 },
-        { key: "IMG_0041", w: 33.4, radius: 37 },
-      ] },
-      { cells: [{ key: "camphoto_351212254", w: 82.6, ml: 17.4, radius: 0 }] },
-      { cells: [
-        { key: "type-w", w: 62.8, radius: 0, ar: 1 },
-        { key: "lux_1", w: 35.3, radius: 16 },
-      ] },
-      { cells: [{ key: "just a regular rock", w: 70.6, ml: 28.3, radius: 0 }] },
-      { cells: [{ key: "Double_Poster_Mockup", w: 100, radius: 16 }] },
-      { cells: [
-        { key: "image 70", w: 29.25, ml: 4.5, radius: 0 },
-        { key: "photo_2022-04-30", w: 63.1, ml: 2.0, radius: 16 },
-      ] },
-      { cells: [{ key: "IMG_2659", w: 64.6, radius: 0 }] },
-    ];
+  var CIRCLE = "50%";
+  var FEED_LAYOUT = [
+    { cells: [{ key: "petals-coral-veo3", w: 100, radius: 0 }] },
+    { cells: [{ key: "494370BC", w: 76.5, radius: 0 }] },
+    { cells: [
+      { key: "Frame 21", w: 50.0, radius: CIRCLE },
+      { key: "sea view rock", w: 50.0, radius: 0 },
+    ] },
+    { cells: [{ key: "swinwarrior1998", w: 100, radius: 0 }] },
+    { cells: [
+      { key: "image 67", w: 37.2, radius: 16 },
+      { key: "image 68", w: 63.0, radius: 55 },
+    ] },
+    { cells: [{ key: "A4 - 28 (3)", w: 61.0, ml: 19.5, radius: 16 }] },
+    { cells: [
+      { key: "untitled-house", w: 66.6, radius: 16 },
+      { key: "IMG_0041", w: 33.4, radius: 37 },
+    ] },
+    { cells: [{ key: "camphoto_351212254", w: 82.6, ml: 17.4, radius: 0 }] },
+    { cells: [
+      { key: "type-w", w: 62.8, radius: 0, ar: 1 },
+      { key: "lux_1", w: 35.3, radius: 16 },
+    ] },
+    { cells: [{ key: "just a regular rock", w: 70.6, ml: 28.3, radius: 0 }] },
+    { cells: [{ key: "Double_Poster_Mockup", w: 100, radius: 16 }] },
+    { cells: [
+      { key: "image 70", w: 29.25, ml: 4.5, radius: 0 },
+      { key: "photo_2022-04-30", w: 63.1, ml: 2.0, radius: 16 },
+    ] },
+    { cells: [{ key: "IMG_2659", w: 64.6, radius: 0 }] },
+  ];
 
-    MOBILE_LAYOUT.forEach(function (rowSpec) {
-      var row = document.createElement("div");
-      row.className = "mrow";
-      rowSpec.cells.forEach(function (cell) {
-        var work = worksByKey[cell.key];
-        if (!work) return;   // a piece pulled from Figma but not yet in rt/ — skip, don't break the page
-        var col = document.createElement("div");
-        col.className = "mcol";
-        col.style.flex = "0 0 " + cell.w + "%";
-        if (cell.ml) col.style.marginLeft = cell.ml + "%";
-        col.appendChild(buildTile(work, cell.radius, cell.ar));
-        row.appendChild(col);
-      });
-      if (row.children.length) board.appendChild(row);
+  FEED_LAYOUT.forEach(function (rowSpec) {
+    var row = document.createElement("div");
+    row.className = "mrow";
+    rowSpec.cells.forEach(function (cell) {
+      var work = worksByKey[cell.key];
+      if (!work) return;   // a piece pulled from Figma but not yet in rt/ — skip, don't break the page
+      var col = document.createElement("div");
+      col.className = "mcol";
+      col.style.flex = "0 0 " + cell.w + "%";
+      if (cell.ml) col.style.marginLeft = cell.ml + "%";
+      col.appendChild(buildTile(work, cell.radius, cell.ar));
+      row.appendChild(col);
     });
-  } else {
-    var z = 0;
-    SITE.columns.forEach(function (column) {
-      var colEl = document.createElement("section");
-      colEl.className = "col";
-      colEl.style.zIndex = String(++z);
-
-      var label = document.createElement("p");
-      label.className = "col-label";
-      label.textContent = column.label;
-      colEl.appendChild(label);
-
-      column.works.forEach(function (work) { colEl.appendChild(buildTile(work)); });
-
-      board.appendChild(colEl);
-      colEls.push(colEl);
-    });
-    if (colEls.length) {
-      colEls[0].classList.add("first");
-      colEls[colEls.length - 1].classList.add("last");
-    }
-  }
-
-  /* ---- vertical wheel scrolls the board sideways (wide screens) ---------- */
-  board.addEventListener("wheel", function (e) {
-    if (phone.matches) return;
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      board.scrollLeft += e.deltaY;
-      e.preventDefault();
-    }
-  }, { passive: false });
+    if (row.children.length) board.appendChild(row);
+  });
 
   addEventListener("keydown", function (e) {
     if (!win.hidden) {
@@ -172,10 +132,6 @@
       else if (e.key === "ArrowLeft") step(-1);
       else if (e.key === "ArrowRight") step(1);
       return;
-    }
-    if (!phone.matches && document.activeElement === board) {
-      if (e.key === "ArrowRight") board.scrollBy({ left: 340, behavior: "smooth" });
-      else if (e.key === "ArrowLeft") board.scrollBy({ left: -340, behavior: "smooth" });
     }
   });
 

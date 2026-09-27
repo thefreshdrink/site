@@ -34,7 +34,8 @@ VIDEO_MAX_WIDTH = 1280
 VIDEO_CRF = 28
 
 # ----------------------------------------------------------------------------
-# The board is columns (kanban on wide screens; a single scroll feed on phones).
+# Series grouping for the manifest. The on-page order/sizes come from
+# FEED_LAYOUT in js/app.js, which picks works by these keys.
 # Each entry below is a column: a label and an ordered list of source files,
 # matched by a case-insensitive substring of the filename. Reorder freely,
 # move a file between columns, rename a label — all safe, nothing is keyed by

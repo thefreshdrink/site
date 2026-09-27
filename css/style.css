@@ -1,20 +1,13 @@
-/* alisik — portfolio
-   >760px : a kanban board — every series is a column, scrolls sideways as one row
-   <=760px: the same columns stacked — each pins while the next slides up over it
-   reference: 5heads.ai/feed + the Claude Design board (rt/Design - desktop.pdf)
+/* creative_archive_2020 — one scattered collage feed (5heads.ai/feed) on every
+   screen: uneven rows of 1-2 works, edge to edge. On a phone it spans the
+   screen; wider screens show the same feed as a centred column.
 ------------------------------------------------------------------------------------ */
 
 :root{
-  --canvas:#141519;
-  --dot:#3a3b42;
   --ink:#f2f1ef;
-  --ink-dim:#8b8b91;
   --focus:#b8a7ff;
-
-  --gap:22px;
-  --dot-size:23px;
+  --feed:680px;                 /* the collage column's width past phone size */
   --radius:34px;
-  --shadow:0 20px 42px -14px rgba(0,0,0,.55);
 
   color-scheme:dark;
   font-family:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -25,56 +18,22 @@ html,body{margin:0}
 html{overflow-anchor:none}   /* don't let layout shifts nudge the scroll position */
 body{
   min-height:100vh;
-  background:var(--canvas);
+  background:#000;
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
 }
-
-/* the dot field — a truly fixed layer, never scrolls, never re-renders per column */
-.bg{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(circle at center, var(--dot) 1.4px, transparent 1.9px)
-    0 0 / var(--dot-size) var(--dot-size);
-}
 main{position:relative;z-index:1}
 
-/* ---- bottom bar: "where am I?" left, logo right ---------------------------
-   text + logo blend with what's behind them (mix-blend-mode:difference), so
-   they invert over artworks and stay readable over light or dark — like 5heads */
-.bar{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;
-  display:flex;align-items:flex-end;justify-content:space-between;
-  padding:26px clamp(30px,6vw,56px);
-  pointer-events:none;
-  mix-blend-mode:difference;          /* on the container, so it blends with the page behind */
-}
-.bar-where,.bar-logo{pointer-events:auto}
-.bar-where{
-  appearance:none;-webkit-appearance:none;border:0;background:transparent;
-  font:inherit;font-weight:600;font-size:clamp(25px,3vw,33px);line-height:1.02;
-  letter-spacing:.005em;text-transform:lowercase;
-  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px;
-  color:#fff;cursor:pointer;padding:0;
-  transition:color .16s;
-  text-align:left;
-}
-.bar-where:hover{color:#8fb0ff}   /* shifts hue under the difference blend — reads as a link */
-.bar-where span{display:block}    /* two lines */
-.bar-logo{display:block;line-height:0}
-.bar-logo img{width:82px;height:auto;display:block}
-
-/* phone chrome — text + logo up top, a second line of text at the bottom.
-   Same inverted style. Hidden on wide screens (shown in the phone @media). */
+/* chrome — both tap-windows in the top corners, the mark at the bottom; they
+   blend with the arts behind (mix-blend-mode:difference), so they invert over
+   artworks and stay readable over light or dark — like 5heads */
 .mbar-top,.mbar-bot{
-  display:none;
+  display:flex;
   position:fixed;left:0;right:0;z-index:60;
   padding:20px clamp(16px,5vw,28px);
   pointer-events:none;
   mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
 }
-/* both tap-windows live in the top bar now, left/right corners — the bottom
-   bar carries only the mark (mbar-mark), see "iPhone 16 - 1" reference */
 .mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px}
 .mbar-bot{bottom:0;align-items:flex-end;justify-content:center}
 .mbar .mtxt{
@@ -88,38 +47,18 @@ main{position:relative;z-index:1}
 .mbar .mtxt-r{text-align:right}
 .mbar .mtxt span{display:block}
 
-.mbar-mark{display:block;width:100%;height:auto;pointer-events:none}
+.mbar-mark{display:block;width:100%;max-width:480px;height:auto;pointer-events:none}
 
-/* ---- board (wide screens) — horizontal kanban ----------------------------- */
+/* ---- the feed --------------------------------------------------------------- */
 .board{
-  display:grid;
-  grid-auto-flow:column;
-  grid-auto-columns:clamp(232px,23vw,338px);
-  align-items:stretch;                 /* every column the same height */
-  gap:clamp(24px,3.4vw,58px);
-  min-height:100svh;
-  padding:64px clamp(28px,5vw,64px) 104px;
-  overflow-x:auto;
-  overflow-y:hidden;
-  scrollbar-width:none;
-  outline:none;
-}
-.board::-webkit-scrollbar{display:none}
-
-.col{
   display:flex;flex-direction:column;
-  gap:var(--gap);
+  width:100%;max-width:var(--feed);
+  margin:0 auto;
+  padding:118px 0 140px;
 }
-
-.col-label{
-  display:flex;align-items:center;gap:12px;
-  margin:0 2px 4px;
-  font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:lowercase;
-  color:var(--ink-dim);white-space:nowrap;
-  opacity:0;transition:opacity .2s ease;   /* revealed on hover of a work in this column */
-}
-.col-label::after{content:"";flex:1;height:1px;background:var(--dot)}
-.col:has(.tile:hover) .col-label{opacity:1}
+/* edge-to-edge, no gap between arts — the reference packs tiles touching */
+.mrow{display:flex;align-items:flex-start}
+.mcol{display:flex;flex-direction:column;min-width:0}
 
 .tile{
   /* it's a <button> — wipe the UA border / grey fill / padding */
@@ -130,53 +69,18 @@ main{position:relative;z-index:1}
   position:relative;
   width:100%;
   aspect-ratio:var(--ar, 1);
-  border-radius:var(--radius);
   overflow:hidden;
-  box-shadow:var(--shadow);
   cursor:zoom-in;
-  transform:translateY(0) scale(1);
-  transition:transform .55s cubic-bezier(.2,.7,.2,1), filter .8s ease, opacity .8s ease;
+  transition:opacity .35s ease-out, filter .35s ease-out;
 }
+/* radius is set inline per-tile by app.js */
 .tile > img,.tile > video{
   width:100%;height:100%;
   object-fit:cover;object-position:center;
   display:block;
 }
-.tile.reveal{filter:blur(16px);opacity:.28;transform:translateY(16px)}
-/* scale-on-hover is a mouse affordance only — a touch tap can "stick" :hover on
-   phones, and scaling a full-bleed sticky tile (without moving its layout box)
-   opened a pixel-line seam at the edge of the tile stacked behind it */
-@media (hover:hover) and (pointer:fine){
-  .tile:hover{transform:translateY(0) scale(1.02)}
-}
-
-/* ---- phone — a scattered collage feed (5heads.ai/feed): uneven rows of 1-2
-   columns, a column stacking up to 2 works, corner radius alternating 0/60 —
-   see the ROW_TEMPLATES/RADII comment in app.js for the actual mix. Triggers
-   on narrow viewports AND on any touch device that's gone short (a phone
-   rotated to landscape) — keep in sync with BREAKPOINT in app.js. ------- */
-@media (max-width:760px), (pointer:coarse) and (max-height:760px){
-  .bar{display:none}
-  .mbar-top,.mbar-bot{display:flex}
-
-  .board{
-    display:flex;flex-direction:column;
-    gap:0;                     /* the desktop rule's gap:clamp(24px,…) otherwise leaks through */
-    padding:118px 0 140px;
-    overflow:visible;
-  }
-  .bg{background:#000}
-
-  /* edge-to-edge, no gap between arts — the reference (and this project's
-     own mobile design since day one) packs tiles touching, not spaced */
-  .mrow{display:flex;align-items:flex-start}
-  .mcol{display:flex;flex-direction:column;min-width:0}
-
-  .tile{width:100%;box-shadow:none;transition:opacity .35s ease-out, filter .35s ease-out}
-  /* radius is set inline per-tile by app.js (0 or 60) — no CSS override needed */
-  /* 5heads.ai reveal (opacity fade, no shift) + a touch of the old blur back in — overrides the desktop .tile.reveal */
-  .tile.reveal{filter:blur(8px);opacity:0;transform:none}
-}
+/* 5heads.ai reveal (opacity fade, no shift) + a touch of blur */
+.tile.reveal{filter:blur(8px);opacity:0}
 
 /* ---- lightbox -------------------------------------------------------------------- */
 .lb{
@@ -262,7 +166,7 @@ main{position:relative;z-index:1}
 /* ---- a11y / motion --------------------------------------------------------- */
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
-  .tile{transition:transform .2s}
-  .tile.reveal{filter:none;opacity:1;transform:none}
+  .tile{transition:none}
+  .tile.reveal{filter:none;opacity:1}
   .win,.win-card{animation:none}
 }
