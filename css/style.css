@@ -34,7 +34,7 @@ main{position:relative;z-index:1}
   pointer-events:none;
   mix-blend-mode:difference;          /* on the container, so it blends with the arts behind */
 }
-.mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px}
+.mbar-top{top:0;align-items:flex-start;justify-content:space-between;gap:16px;max-width:var(--feed);margin:0 auto}   /* labels sit over the feed column, not the screen edges */
 .mbar-bot{bottom:0;align-items:flex-end;justify-content:center}
 .mbar .mtxt{
   pointer-events:auto;
